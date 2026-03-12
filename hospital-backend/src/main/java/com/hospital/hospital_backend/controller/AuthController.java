@@ -23,7 +23,7 @@ import com.hospital.hospital_backend.service.impl.UserDetailsImpl;
 @RestController
 @RequestMapping("/api/auth") // Matching frontend call
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:3000")
+// @CrossOrigin(origins = "http://localhost:3000")
 public class AuthController {
 
     private final UserRepository userRepository;
