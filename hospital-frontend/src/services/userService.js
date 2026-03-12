@@ -1,6 +1,5 @@
 import api from './api';
 
-// Path changed to /auth/doctors to match AuthController
 export const getAllDoctors = () => {
     return api.get('/auth/doctors');
 };
