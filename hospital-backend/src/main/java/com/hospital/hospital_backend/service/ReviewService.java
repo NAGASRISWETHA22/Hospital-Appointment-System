@@ -1,0 +1,10 @@
+package com.hospital.hospital_backend.service;
+
+import com.hospital.hospital_backend.entity.Review;
+import java.util.List;
+
+public interface ReviewService {
+    Review addReview(Review review);
+    List<Review> getReviewsByDoctor(Long doctorId);
+    void deleteReview(Long id);
+}
