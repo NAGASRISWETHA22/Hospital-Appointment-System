@@ -13,7 +13,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.List;
+import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
@@ -32,6 +32,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Explicitly use our CORS bean
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll() // Allow preflight
                         .requestMatchers("/api/auth/**").permitAll() // Login/Register routes are public
                         .anyRequest().authenticated()); // Others need authentication
 
@@ -48,14 +49,21 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // Frontend URLs (Local and Vercel)
-        configuration.setAllowedOrigins(List.of(
+        // Allow all Vercel preview/production URLs for this project + localhost
+        configuration.setAllowedOriginPatterns(Arrays.asList(
                 "http://localhost:3000",
-                "https://hospital-appointment-system-theta.vercel.app"));
+                "https://hospital-appoint-*.vercel.app",
+                "https://hospital-appointment-system-*.vercel.app",
+                "https://*-nagasriswetha*.vercel.app",
+                "https://hospital-appointment-system-theta.vercel.app",
+                "https://hospital-appoint-git-9bb5ff-nagasriswethamurugan-5555s-projects.vercel.app"
+        ));
 
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH", "HEAD"));
+        configuration.setAllowedHeaders(Arrays.asList("*"));
+        configuration.setExposedHeaders(Arrays.asList("Authorization", "Content-Type"));
         configuration.setAllowCredentials(true);
+        configuration.setMaxAge(3600L); // Cache preflight for 1 hour
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
