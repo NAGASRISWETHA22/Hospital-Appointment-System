@@ -32,10 +32,7 @@ const Register = () => {
           <input type="password" placeholder="Password" required 
             onChange={(e) => setFormData({...formData, password: e.target.value})} />
           
-          <select value={formData.role} onChange={(e) => setFormData({...formData, role: e.target.value})}>
-            <option value="PATIENT">Patient</option>
-            <option value="DOCTOR">Doctor</option>
-          </select>
+
 
           <button type="submit" className="auth-btn">Sign Up</button>
         </form>

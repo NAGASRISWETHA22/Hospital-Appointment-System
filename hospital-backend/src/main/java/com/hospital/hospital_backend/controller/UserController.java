@@ -39,4 +39,17 @@ public class UserController {
         userService.deleteUser(id);
         return ResponseEntity.ok().build();
     }
+
+    @GetMapping("/doctors/available-on")
+    public ResponseEntity<List<User>> getDoctorsAvailableOn(@RequestParam("date") String date) {
+        return ResponseEntity.ok(userService.getDoctorsAvailableOn(date));
+    }
+
+    @GetMapping("/doctors/search")
+    public ResponseEntity<List<User>> searchDoctors(
+            @RequestParam(required = false) Long deptId,
+            @RequestParam(required = false) String spec,
+            @RequestParam(required = false) String name) {
+        return ResponseEntity.ok(userService.searchDoctors(deptId, spec, name));
+    }
 }

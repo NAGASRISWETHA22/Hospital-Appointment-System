@@ -12,6 +12,8 @@ const DoctorList = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedDept, setSelectedDept] = useState('');
     const [searchDate, setSearchDate] = useState('');
+    const [sourceForFiltering, setSourceForFiltering] = useState([]);
+    const [dateFilteredDoctors, setDateFilteredDoctors] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedDoctor, setSelectedDoctor] = useState(null);
     const [viewingProfile, setViewingProfile] = useState(null);
@@ -30,6 +32,14 @@ const DoctorList = () => {
         fetchInitialData();
     }, []);
 
+    useEffect(() => {
+        if (searchDate) {
+            handleDateSearch();
+        } else {
+            setSourceForFiltering(doctors); // Reset to all doctors if date is cleared
+        }
+    }, [searchDate]);
+
     const fetchInitialData = async () => {
         setLoading(true);
         try {
@@ -38,9 +48,23 @@ const DoctorList = () => {
                 getAllDepartments()
             ]);
             setDoctors(docRes.data || []);
+            setSourceForFiltering(docRes.data || []); // Initialize source
             setDepartments(deptRes.data || []);
         } catch (err) {
             console.error("Failed to fetch data:", err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleDateSearch = async () => {
+        setLoading(true);
+        try {
+            const res = await API.get(`/doctors/available-on?date=${searchDate}`);
+            setSourceForFiltering(res.data || []);
+        } catch (err) {
+            console.error("Failed to fetch doctors by date:", err);
+            setSourceForFiltering([]); // Clear results on error
         } finally {
             setLoading(false);
         }
@@ -98,7 +122,7 @@ const DoctorList = () => {
     };
 
     // Filter doctors based on search (Name or Specialization) and Department
-    const filteredDoctors = doctors.filter(doctor => {
+    const filteredDoctors = sourceForFiltering.filter(doctor => {
         const matchesSearch = doctor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             (doctor.specialization && doctor.specialization.toLowerCase().includes(searchTerm.toLowerCase()));
         const matchesDept = selectedDept === '' || doctor.department?.id === parseInt(selectedDept);

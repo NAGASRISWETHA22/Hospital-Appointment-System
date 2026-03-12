@@ -159,11 +159,11 @@ const AdminPanel = ({ mode }) => {
                             <h4>Revenue per Department</h4>
                             <table className="mini-table">
                                 <thead>
-                                    <tr><th>Department</th><th>Revenue</th></tr>
+                                    <tr><th>Department</th><th>Revenue (Rs.)</th></tr>
                                 </thead>
                                 <tbody>
                                     {stats?.revenuePerDepartment?.map((row, idx) => (
-                                        <tr key={idx}><td>{row.departmentName}</td><td>₹{row.revenue}</td></tr>
+                                        <tr key={idx}><td>{row.departmentName}</td><td>Rs. {row.revenue}</td></tr>
                                     ))}
                                 </tbody>
                             </table>
@@ -176,7 +176,7 @@ const AdminPanel = ({ mode }) => {
                                 </thead>
                                 <tbody>
                                     {stats?.appointmentsPerDoctor?.map((row, idx) => (
-                                        <tr key={idx}><td>{row.doctorName}</td><td>{row.count}</td></tr>
+                                        <tr key={idx}><td>{row.doctorName}</td><td>{row.appointmentCount}</td></tr>
                                     ))}
                                 </tbody>
                             </table>
@@ -192,6 +192,31 @@ const AdminPanel = ({ mode }) => {
                         <h3>Registered Doctors</h3>
                         <button className="add-btn" onClick={() => setShowModal(true)}>+ Add New Doctor</button>
                     </div>
+
+                    {showModal && (
+                        <div className="modal-backdrop">
+                            <div className="modal-content">
+                                <h3>Add New Doctor</h3>
+                                <form onSubmit={handleAddDoctor}>
+                                    <input type="text" placeholder="Full Name" required value={newDoctor.name} onChange={(e) => setNewDoctor({...newDoctor, name: e.target.value})} />
+                                    <input type="email" placeholder="Email Address" required value={newDoctor.email} onChange={(e) => setNewDoctor({...newDoctor, email: e.target.value})} />
+                                    <input type="password" placeholder="Temporary Password" required value={newDoctor.password} onChange={(e) => setNewDoctor({...newDoctor, password: e.target.value})} />
+                                    <input type="text" placeholder="Specialization (e.g., Cardiologist)" required value={newDoctor.specialization} onChange={(e) => setNewDoctor({...newDoctor, specialization: e.target.value})} />
+                                    <select required value={newDoctor.department.id} onChange={(e) => setNewDoctor({...newDoctor, department: { id: e.target.value }})}>
+                                        <option value="">Select Department</option>
+                                        {departments.map(dept => (
+                                            <option key={dept.id} value={dept.id}>{dept.name}</option>
+                                        ))}
+                                    </select>
+                                    <div className="modal-actions">
+                                        <button type="submit" className="btn-primary">Save Doctor</button>
+                                        <button type="button" className="btn-secondary" onClick={() => setShowModal(false)}>Cancel</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    )}
+
                     
                     <table className="doctor-table">
                         <thead>

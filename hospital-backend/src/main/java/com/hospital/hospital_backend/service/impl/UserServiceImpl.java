@@ -65,4 +65,15 @@ public class UserServiceImpl implements UserService {
     public void deleteUser(Long id) {
         userRepository.deleteById(id);
     }
+
+    @Override
+    public java.util.List<User> getDoctorsAvailableOn(String date) {
+        java.time.LocalDate localDate = java.time.LocalDate.parse(date);
+        return userRepository.findDoctorsWithAvailabilityOnDate(localDate);
+    }
+
+    @Override
+    public java.util.List<User> searchDoctors(Long deptId, String spec, String name) {
+        return userRepository.searchDoctors(deptId, spec, name);
+    }
 }

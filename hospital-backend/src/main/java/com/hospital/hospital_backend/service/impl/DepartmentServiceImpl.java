@@ -13,6 +13,7 @@ import java.util.List;
 public class DepartmentServiceImpl implements DepartmentService {
 
     private final DepartmentRepository departmentRepository;
+    private final com.hospital.hospital_backend.repository.UserRepository userRepository;
 
     @Override
     public Department createDepartment(Department department) {
@@ -30,7 +31,14 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
+    @org.springframework.transaction.annotation.Transactional
     public void deleteDepartment(Long id) {
+        // Clear department from all users assigned to it
+        List<com.hospital.hospital_backend.entity.User> users = userRepository.findByRoleAndDepartmentId(com.hospital.hospital_backend.enums.Role.DOCTOR, id);
+        for (com.hospital.hospital_backend.entity.User user : users) {
+            user.setDepartment(null);
+            userRepository.save(user);
+        }
         departmentRepository.deleteById(id);
     }
 }

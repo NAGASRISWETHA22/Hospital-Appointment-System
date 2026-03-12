@@ -13,7 +13,7 @@ export const register = (userData) => {
 };
 
 export const registerDoctor = (doctorData) => {
-    return api.post('/auth/register', {
+    return api.post('/auth/register-doctor', {
         ...doctorData,
         role: 'DOCTOR'
     });

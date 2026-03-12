@@ -55,7 +55,10 @@ const DoctorSchedule = ({ doctorId, viewOnly = false }) => {
                     {schedule.length > 0 ? (
                         schedule.map(app => (
                             <tr key={app.id}>
-                                <td><strong>{app.patient.name}</strong></td>
+                                <td>
+                                    <strong>{app.patient.name}</strong><br/>
+                                    <small style={{ color: '#666' }}>{app.patient.email}</small>
+                                </td>
                                 <td>{app.appointmentDate}</td>
                                 <td>{app.startTime} - {app.endTime}</td>
                                 <td>

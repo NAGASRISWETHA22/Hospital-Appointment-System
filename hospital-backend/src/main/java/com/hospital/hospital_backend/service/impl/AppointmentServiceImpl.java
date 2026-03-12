@@ -93,6 +93,16 @@ public class AppointmentServiceImpl implements AppointmentService {
         Appointment app = appointmentRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Appointment not found"));
 
+        // If cancelling, free up the doctor's slot
+        if (status == AppointmentStatus.CANCELLED) {
+            Optional<DoctorAvailability> slotOpt = availabilityRepository
+                    .findByDoctorAndAvailableDateAndStartTime(app.getDoctor(), app.getAppointmentDate(), app.getStartTime());
+            slotOpt.ifPresent(slot -> {
+                slot.setBooked(false);
+                availabilityRepository.save(slot);
+            });
+        }
+
         app.setStatus(status);
         return appointmentRepository.save(app);
     }

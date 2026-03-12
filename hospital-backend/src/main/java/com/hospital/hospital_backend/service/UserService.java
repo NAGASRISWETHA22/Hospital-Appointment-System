@@ -12,4 +12,6 @@ public interface UserService {
     List<User> getDoctorsByDepartment(Long departmentId);
     User getUserById(Long id);
     void deleteUser(Long id);
+    List<User> getDoctorsAvailableOn(String date);
+    List<User> searchDoctors(Long deptId, String spec, String name);
 }

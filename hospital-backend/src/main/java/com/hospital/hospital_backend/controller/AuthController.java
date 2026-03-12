@@ -34,6 +34,20 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody User user) {
         try {
+            // Only allow Patient registration from this public endpoint
+            user.setRole(Role.PATIENT);
+            User registered = userService.register(user);
+            return ResponseEntity.ok(registered);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/register-doctor")
+    public ResponseEntity<?> registerDoctor(@RequestBody User user) {
+        try {
+            // Admin only endpoint (checked by SecurityConfig)
+            user.setRole(Role.DOCTOR);
             User registered = userService.register(user);
             return ResponseEntity.ok(registered);
         } catch (RuntimeException e) {
