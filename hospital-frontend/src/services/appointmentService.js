@@ -1,34 +1,33 @@
 import API from './api';
 
 // --- PATIENT FEATURES ---
-// 1. New appointment book panna
 export const bookAppointment = (data) => API.post('/appointments/book', data);
 
-// 2. Patient-oda history fetch panna (Fix for empty history issue)
+// used for both patient history and doctor schedule
 export const getPatientHistory = (patientId) => API.get(`/appointments/patient/${patientId}`);
 
-// 3. Patient appointment-a cancel panna
+// cancel appointment - patient or doctor can cancel, but status update is unified
 // Backend supports unified status update endpoint
 export const cancelAppointment = (appointmentId) =>
     API.put(`/appointments/status/${appointmentId}?status=CANCELLED`);
 
 
 // --- DOCTOR FEATURES ---
-// 4. Doctor-oda full schedule-a paaka
+// 4. to see the schedule of appointments for a doctor (for doctor dashboard)
 export const getDoctorSchedule = (doctorId) => API.get(`/appointments/doctor/${doctorId}`);
 
-// 5. Appointment status-a update panna (Confirm/Reject/Complete)
+// 5. update the appointment status (e.g., mark as completed after consultation)
 // Status values: 'CONFIRMED', 'CANCELLED', 'COMPLETED'
 export const updateAppointmentStatus = (id, status) => 
     API.put(`/appointments/status/${id}?status=${status}`);
 
 
 // --- ADMIN FEATURES ---
-// 6. System-la irukura ella appointments-aiyum paaka
+// 6. to see the list of all appointments (for admin dashboard)
 export const getAllAppointments = () => API.get('/appointments/all');
 
-// 7. Admin cancel panna (Override power)
+// 7. to cancel any appointment (for admin)
 export const adminCancelAppointment = (id) => API.delete(`/appointments/delete/${id}`);
 
-// 8. Revenue or Analytics-kaga report fetch panna (Optional/Future)
+// 8. for revenue reports, analytics, etc. (for admin)
 export const getAppointmentReports = () => API.get('/appointments/reports/analytics');

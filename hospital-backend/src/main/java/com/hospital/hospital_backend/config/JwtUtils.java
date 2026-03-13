@@ -3,14 +3,17 @@ package com.hospital.hospital_backend.config;
 import java.util.Date;
 
 import org.springframework.stereotype.Component;
-
+import org.springframework.beans.factory.annotation.Value;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 
 @Component
 public class JwtUtils {
-    private String jwtSecret = "SecretKey007HospitalManagementSystemProject2026"; // Must be long
-    private int jwtExpirationMs = 86400000; // 24 hours
+    @Value("${app.jwt.secret}") // Inject from application.properties
+    private String jwtSecret;
+
+    @Value("${app.jwt.expiration-ms}")
+    private int jwtExpirationMs;// 24 hours
 
     public String generateToken(String email) {
         return Jwts.builder()
