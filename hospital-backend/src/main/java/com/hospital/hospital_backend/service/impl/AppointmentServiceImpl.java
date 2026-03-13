@@ -1,7 +1,6 @@
 package com.hospital.hospital_backend.service.impl;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -93,8 +92,8 @@ public class AppointmentServiceImpl implements AppointmentService {
         Appointment app = appointmentRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Appointment not found"));
 
-        // If cancelling, free up the doctor's slot
-        if (status == AppointmentStatus.CANCELLED) {
+        // If cancelling OR rejecting, free up the doctor's slot
+        if (status == AppointmentStatus.CANCELLED || status == AppointmentStatus.REJECTED) {
             Optional<DoctorAvailability> slotOpt = availabilityRepository
                     .findByDoctorAndAvailableDateAndStartTime(app.getDoctor(), app.getAppointmentDate(), app.getStartTime());
             slotOpt.ifPresent(slot -> {

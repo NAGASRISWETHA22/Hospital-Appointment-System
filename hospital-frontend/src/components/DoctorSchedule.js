@@ -78,7 +78,7 @@ const DoctorSchedule = ({ doctorId, viewOnly = false }) => {
                                                 </button>
                                                 <button 
                                                     className="cancel-btn-small"
-                                                    onClick={() => handleStatusUpdate(app.id, 'CANCELLED')}
+                                                    onClick={() => handleStatusUpdate(app.id, 'REJECTED')}
                                                 >
                                                     Reject
                                                 </button>

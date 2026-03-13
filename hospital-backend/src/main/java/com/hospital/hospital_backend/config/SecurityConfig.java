@@ -36,29 +36,28 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Explicitly use our CORS bean
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll() // Allow
-                                                                                                         // preflight
+                        .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll() // Allow preflight
                         .requestMatchers("/api/auth/**").permitAll() // Login/Register routes are public
-
+                        
                         // Patient Features
                         .requestMatchers("/api/appointments/book").hasRole("PATIENT")
                         .requestMatchers("/api/appointments/patient/**").hasRole("PATIENT")
-                        .requestMatchers("/api/reviews/add").hasRole("PATIENT")
-
+                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/reviews/**").hasRole("PATIENT")
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/reviews/**").permitAll()
+                        
                         // Doctor Features
                         .requestMatchers("/api/availability/**").hasAnyRole("DOCTOR", "PATIENT", "ADMIN")
                         .requestMatchers("/api/appointments/doctor/**").hasRole("DOCTOR")
                         .requestMatchers("/api/appointments/*/status").hasAnyRole("DOCTOR", "ADMIN", "PATIENT")
-
+                        
                         // Admin Features
                         .requestMatchers("/api/departments/**").hasAnyRole("ADMIN", "PATIENT", "DOCTOR")
                         .requestMatchers("/api/analytics/**").hasRole("ADMIN")
                         .requestMatchers("/api/auth/register-doctor").hasRole("ADMIN")
                         .requestMatchers("/api/users/**").hasRole("ADMIN")
-
+                        
                         .anyRequest().authenticated()) // Others need authentication
-                .addFilterBefore(jwtFilter,
-                        org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtFilter, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
@@ -80,7 +79,8 @@ public class SecurityConfig {
                 "https://hospital-appointment-system-*.vercel.app",
                 "https://*-nagasriswetha*.vercel.app",
                 "https://hospital-appointment-system-theta.vercel.app",
-                "https://hospital-appoint-git-9bb5ff-nagasriswethamurugan-5555s-projects.vercel.app"));
+                "https://hospital-appoint-git-9bb5ff-nagasriswethamurugan-5555s-projects.vercel.app"
+        ));
 
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH", "HEAD"));
         configuration.setAllowedHeaders(Arrays.asList("*"));

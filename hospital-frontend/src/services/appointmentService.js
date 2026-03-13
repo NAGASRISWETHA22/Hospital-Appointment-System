@@ -8,7 +8,9 @@ export const bookAppointment = (data) => API.post('/appointments/book', data);
 export const getPatientHistory = (patientId) => API.get(`/appointments/patient/${patientId}`);
 
 // 3. Patient appointment-a cancel panna
-export const cancelAppointment = (appointmentId) => API.put(`/appointments/cancel/${appointmentId}`);
+// Backend supports unified status update endpoint
+export const cancelAppointment = (appointmentId) =>
+    API.put(`/appointments/status/${appointmentId}?status=CANCELLED`);
 
 
 // --- DOCTOR FEATURES ---

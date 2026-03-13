@@ -9,7 +9,7 @@ import java.util.Optional;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
-
+    
     // Find a user by email for the Login logic
     Optional<User> findByEmail(String email);
 
@@ -20,8 +20,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     List<User> findByRoleAndDepartmentId(Role role, Long departmentId);
 
     @org.springframework.data.jpa.repository.Query("SELECT DISTINCT u FROM User u JOIN u.availabilities a WHERE a.availableDate = :date AND a.booked = false")
-    List<User> findDoctorsWithAvailabilityOnDate(
-            @org.springframework.data.repository.query.Param("date") java.time.LocalDate date);
+     List<User> findDoctorsWithAvailabilityOnDate(@org.springframework.data.repository.query.Param("date") java.time.LocalDate date);
 
     @org.springframework.data.jpa.repository.Query("SELECT u FROM User u WHERE u.role = 'DOCTOR' " +
             "AND (:deptId IS NULL OR u.department.id = :deptId) " +
