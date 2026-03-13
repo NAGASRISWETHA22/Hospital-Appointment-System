@@ -133,130 +133,125 @@ const DoctorList = () => {
 
     return (
         <div className="info-section">
-            <div className="section-header">
-                <h3>Available Doctors</h3>
-                <div className="filter-group" style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                    <select 
-                        className="dept-filter"
-                        value={selectedDept}
-                        onChange={(e) => setSelectedDept(e.target.value)}
-                        style={{ padding: '8px', borderRadius: '8px', border: '1px solid #e2e8f0' }}
-                    >
-                        <option value="">All Departments</option>
-                        {departments.map(dept => (
-                            <option key={dept.id} value={dept.id}>{dept.name}</option>
-                        ))}
-                    </select>
-                    <input 
-                        type="date"
-                        className="date-filter"
-                        value={searchDate}
-                        onChange={(e) => setSearchDate(e.target.value)}
-                        min={new Date().toISOString().split('T')[0]}
-                        style={{ padding: '8px', borderRadius: '8px', border: '1px solid #e2e8f0' }}
-                    />
-                    <input 
-                        type="text" 
-                        placeholder="Search by name or specialization..." 
-                        className="search-bar"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        style={{ flex: 1, minWidth: '200px' }}
-                    />
+            <div className="section-header-modern">
+                <div className="sh-title">
+                    <h3>Available Doctors</h3>
+                    <p>Find the best medical experts for your needs</p>
+                </div>
+                <div className="filter-shelf">
+                    <div className="filter-item">
+                        <label>Department</label>
+                        <select 
+                            className="premium-select"
+                            value={selectedDept}
+                            onChange={(e) => setSelectedDept(e.target.value)}
+                        >
+                            <option value="">All Departments</option>
+                            {departments.map(dept => (
+                                <option key={dept.id} value={dept.id}>{dept.name}</option>
+                            ))}
+                        </select>
+                    </div>
+                    <div className="filter-item">
+                        <label>Availability</label>
+                        <input 
+                            type="date"
+                            className="premium-date"
+                            value={searchDate}
+                            onChange={(e) => setSearchDate(e.target.value)}
+                            min={new Date().toISOString().split('T')[0]}
+                        />
+                    </div>
+                    <div className="filter-item search-box">
+                        <label>Quick Search</label>
+                        <input 
+                            type="text" 
+                            placeholder="Name or specialty..." 
+                            className="premium-search"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                    </div>
                 </div>
             </div>
 
-            <table className="doctor-table">
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Specialization</th>
-                        <th>Department</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {filteredDoctors.length > 0 ? (
-                        filteredDoctors.map(doctor => (
-                            <tr key={doctor.id}>
-                                <td onClick={() => fetchDoctorProfile(doctor)} style={{ cursor: 'pointer', color: '#1e40af', fontWeight: 'bold' }}>
-                                    {doctor.name}
-                                </td>
-                                <td>{doctor.specialization || 'General'}</td>
-                                <td>{doctor.department?.name || 'General'}</td>
-                                <td>
-                                    <button 
-                                        className="book-btn"
-                                        onClick={() => {
-                                            setSelectedDoctor(doctor);
-                                            setAvailableSlots([]);
-                                            setBookingData({ date: '', slot: null });
-                                        }}
-                                    >
-                                        Book Appointment
-                                    </button>
-                                </td>
-                            </tr>
-                        ))
-                    ) : (
-                        <tr><td colSpan="4" style={{textAlign: 'center'}}>No doctors found.</td></tr>
-                    )}
-                </tbody>
-            </table>
+            <div className="doctor-grid">
+                {filteredDoctors.length > 0 ? (
+                    filteredDoctors.map(doctor => (
+                        <div key={doctor.id} className="doctor-card">
+                            <div className="doc-card-header">
+                                <h4 onClick={() => fetchDoctorProfile(doctor)} className="doc-name">{doctor.name}</h4>
+                                <span className="doc-specialty">{doctor.specialization || 'General'}</span>
+                            </div>
+                            <div className="doc-card-body">
+                                <p className="doc-dept">
+                                    <i className="dept-icon">🏢</i> {doctor.department?.name || 'General Department'}
+                                </p>
+                            </div>
+                            <div className="doc-card-footer">
+                                <button className="book-btn-modern" onClick={() => {
+                                    setSelectedDoctor(doctor);
+                                    setAvailableSlots([]);
+                                    setBookingData({ date: '', slot: null });
+                                }}>Book Appointment</button>
+                            </div>
+                        </div>
+                    ))
+                ) : (
+                    <div className="empty-state">No doctors match your criteria.</div>
+                )}
+            </div>
 
             {/* Doctor Profile Modal */}
             {viewingProfile && (
-                <div className="modal-overlay">
-                    <div className="booking-modal profile-modal" style={{ width: '600px' }}>
-                        <div className="profile-header" style={{ borderBottom: '1px solid #eee', paddingBottom: '15px', marginBottom: '15px' }}>
-                            <h4>Dr. {viewingProfile.name}</h4>
-                            <p className="role-badge">{viewingProfile.specialization}</p>
-                            <p style={{ color: '#64748b', fontSize: '14px' }}>{viewingProfile.department?.name} Department</p>
+                <div className="modal-overlay" onClick={() => setViewingProfile(null)}>
+                    <div className="booking-modal profile-modal premium-modal" onClick={e => e.stopPropagation()}>
+                        <div className="pm-header">
+                            <div className="pm-title-area">
+                                <h4>Dr. {viewingProfile.name}</h4>
+                                <span className="role-badge">{viewingProfile.specialization || 'General'}</span>
+                            </div>
+                            <p className="pm-dept">{viewingProfile.department?.name} Department</p>
                         </div>
                         
                         <div className="reviews-section">
                             <h5>Patient Reviews</h5>
-                            <div className="reviews-list" style={{ maxHeight: '300px', overflowY: 'auto' }}>
+                            <div className="reviews-list">
                                 {doctorReviews.length > 0 ? (
                                     doctorReviews.map(review => (
-                                        <div key={review.id} className="review-item" style={{ padding: '10px', borderBottom: '1px solid #f8fafc' }}>
-                                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                                <span style={{ fontWeight: '600', fontSize: '14px' }}>{review.patient?.name}</span>
-                                                <span style={{ color: '#f59e0b' }}>{"★".repeat(review.rating)}</span>
+                                        <div key={review.id} className="review-item">
+                                            <div className="review-header">
+                                                <span className="reviewer-name">{review.patient?.name}</span>
+                                                <span className="stars">{"★".repeat(review.rating)}{"☆".repeat(5-review.rating)}</span>
                                             </div>
-                                            <p style={{ margin: '5px 0 0 0', fontSize: '13px', color: '#475569' }}>{review.comment}</p>
+                                            <p className="review-text">{review.comment}</p>
                                         </div>
                                     ))
                                 ) : (
-                                    <p style={{ color: '#94a3b8', fontSize: '13px', textAlign: 'center', padding: '20px' }}>No reviews yet.</p>
+                                    <div className="empty-reviews">No reviews yet.</div>
                                 )}
                             </div>
                         </div>
-
                         <div className="modal-actions">
-                            <button 
-                                className="cancel-btn" 
-                                onClick={() => setViewingProfile(null)}
-                            >
-                                Close Profile
-                            </button>
+                            <button className="cancel-btn" onClick={() => setViewingProfile(null)}>Close Profile</button>
                         </div>
                     </div>
                 </div>
             )}
 
-            {/* Simple Booking Modal Overlay */}
+            {/* Booking Modal Overlay */}
             {selectedDoctor && (
-                <div className="modal-overlay">
-                    <div className="booking-modal">
-                        <h4>Book with {selectedDoctor.name}</h4>
-                        <form onSubmit={handleBookingSubmit}>
-                            <div className="form-group">
-                                <label>Date:</label>
-                                <input 
-                                    type="date" 
-                                    required 
-                                    min={new Date().toISOString().split('T')[0]} // Future date constraint
+                <div className="modal-overlay" onClick={() => setSelectedDoctor(null)}>
+                    <div className="booking-modal premium-modal" onClick={e => e.stopPropagation()}>
+                        <div className="pm-header">
+                            <h4>Book with {selectedDoctor.name}</h4>
+                            <p className="pm-subtitle">Select a suitable date and time</p>
+                        </div>
+                        <form onSubmit={handleBookingSubmit} className="booking-form">
+                            <div className="form-group modern-input-group">
+                                <label>Date</label>
+                                <input type="date" required 
+                                    min={new Date().toISOString().split('T')[0]} 
                                     value={bookingData.date}
                                     onChange={(e) => {
                                         const date = e.target.value;
@@ -267,45 +262,32 @@ const DoctorList = () => {
                             </div>
                             
                             <div className="form-group">
-                                <label>Available Slots:</label>
+                                <label>Available Slots</label>
                                 {fetchingSlots ? (
-                                    <p>Loading slots...</p>
+                                    <div className="loading-spinner">Loading slots...</div>
                                 ) : (
-                                    <div className="slot-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px', marginTop: '10px' }}>
+                                    <div className="slot-grid modern-slot-grid">
                                         {availableSlots.length > 0 ? (
                                             availableSlots.map(slot => (
-                                                <button
-                                                    key={slot.id}
-                                                    type="button"
-                                                    className={`slot-btn ${bookingData.slot?.id === slot.id ? 'selected' : ''}`}
+                                                <button key={slot.id} type="button"
+                                                    className={`slot-pill ${bookingData.slot?.id === slot.id ? 'selected' : ''}`}
                                                     onClick={() => setBookingData({...bookingData, slot})}
-                                                    style={{
-                                                        padding: '10px',
-                                                        border: bookingData.slot?.id === slot.id ? '2px solid #007bff' : '1px solid #ddd',
-                                                        backgroundColor: bookingData.slot?.id === slot.id ? '#e7f1ff' : '#fff',
-                                                        borderRadius: '4px',
-                                                        cursor: 'pointer'
-                                                    }}
                                                 >
                                                     {slot.startTime} - {slot.endTime}
                                                 </button>
                                             ))
                                         ) : (
-                                            <p style={{ color: '#666' }}>{bookingData.date ? 'No slots available for this date.' : 'Please select a date first.'}</p>
+                                            <div className="empty-slots">
+                                                {bookingData.date ? 'No slots available for this date.' : 'Please select a date first.'}
+                                            </div>
                                         )}
                                     </div>
                                 )}
                             </div>
 
-                            <div className="modal-actions" style={{ marginTop: '20px' }}>
+                            <div className="modal-actions row-actions">
+                                <button type="button" className="cancel-btn" onClick={() => setSelectedDoctor(null)}>Cancel</button>
                                 <button type="submit" className="confirm-btn" disabled={!bookingData.slot}>Confirm Booking</button>
-                                <button 
-                                    type="button" 
-                                    className="cancel-btn"
-                                    onClick={() => setSelectedDoctor(null)}
-                                >
-                                    Cancel
-                                </button>
                             </div>
                         </form>
                     </div>

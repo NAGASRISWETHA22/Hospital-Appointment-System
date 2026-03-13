@@ -36,75 +36,57 @@ const DoctorSchedule = ({ doctorId, viewOnly = false }) => {
 
     return (
         <div className="info-section">
-            <div className="section-header">
+            <div className="section-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                 <h3>{viewOnly ? "Today's Overview" : "Manage My Appointments"}</h3>
-                {!viewOnly && <button className="refresh-btn" onClick={fetchSchedule}>Refresh</button>}
+                {!viewOnly && <button className="add-btn" onClick={fetchSchedule} style={{ padding: '8px 16px', borderRadius: '20px' }}>↻ Refresh</button>}
             </div>
 
-            <table className="doctor-table">
-                <thead>
-                    <tr>
-                        <th>Patient Name</th>
-                        <th>Date</th>
-                        <th>Time</th>
-                        <th>Status</th>
-                        {!viewOnly && <th>Actions</th>}
-                    </tr>
-                </thead>
-                <tbody>
-                    {schedule.length > 0 ? (
-                        schedule.map(app => (
-                            <tr key={app.id}>
-                                <td>
-                                    <strong>{app.patient.name}</strong><br/>
-                                    <small style={{ color: '#666' }}>{app.patient.email}</small>
-                                </td>
-                                <td>{app.appointmentDate}</td>
-                                <td>{app.startTime} - {app.endTime}</td>
-                                <td>
-                                    <span className={`status-pill ${app.status.toLowerCase()}`}>
-                                        {app.status}
-                                    </span>
-                                </td>
-                                {!viewOnly && (
-                                    <td>
-                                        {app.status === 'PENDING' && (
-                                            <div className="action-buttons">
-                                                <button 
-                                                    className="confirm-btn-small"
-                                                    onClick={() => handleStatusUpdate(app.id, 'CONFIRMED')}
-                                                >
-                                                    Confirm
-                                                </button>
-                                                <button 
-                                                    className="cancel-btn-small"
-                                                    onClick={() => handleStatusUpdate(app.id, 'REJECTED')}
-                                                >
-                                                    Reject
-                                                </button>
-                                            </div>
-                                        )}
-                                        {app.status === 'CONFIRMED' && (
-                                            <button 
-                                                className="complete-btn-small"
-                                                onClick={() => handleStatusUpdate(app.id, 'COMPLETED')}
-                                            >
-                                                Mark Completed
+            <div className="availability-grid">
+                {schedule.length > 0 ? (
+                    schedule.map(app => (
+                        <div key={app.id} className="availability-card">
+                            <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <span className="date-badge">{app.appointmentDate}</span>
+                                <span className={`status-pill ${app.status.toLowerCase()}`}>{app.status}</span>
+                            </div>
+                            <div className="card-body">
+                                <h4 className="doc-name" style={{margin: '0 0 5px 0'}}>{app.patient.name}</h4>
+                                <p style={{ margin: '0 0 15px 0', color: '#64748b', fontSize: '13px' }}>{app.patient.email}</p>
+                                
+                                <div className="time-range">
+                                    <span className="time-block">Start: <b>{app.startTime}</b></span>
+                                    <span className="time-block">End: <b>{app.endTime}</b></span>
+                                </div>
+                            </div>
+                            
+                            {!viewOnly && (
+                                <div className="card-footer">
+                                    {app.status === 'PENDING' && (
+                                        <div style={{ display: 'flex', gap: '10px' }}>
+                                            <button className="book-btn-modern" style={{ flex: 1, backgroundColor: '#10b981' }} onClick={() => handleStatusUpdate(app.id, 'CONFIRMED')}>
+                                                Confirm
                                             </button>
-                                        )}
-                                    </td>
-                                )}
-                            </tr>
-                        ))
-                    ) : (
-                        <tr>
-                            <td colSpan={viewOnly ? "4" : "5"} style={{ textAlign: 'center', padding: '20px' }}>
-                                No appointments found in your schedule.
-                            </td>
-                        </tr>
-                    )}
-                </tbody>
-            </table>
+                                            <button className="delete-btn-modern" style={{ flex: 1 }} onClick={() => handleStatusUpdate(app.id, 'REJECTED')}>
+                                                Reject
+                                            </button>
+                                        </div>
+                                    )}
+                                    {app.status === 'CONFIRMED' && (
+                                        <button className="book-btn-modern" style={{ width: '100%' }} onClick={() => handleStatusUpdate(app.id, 'COMPLETED')}>
+                                            Mark Completed
+                                        </button>
+                                    )}
+                                    {(app.status === 'COMPLETED' || app.status === 'CANCELLED' || app.status === 'REJECTED') && (
+                                       <span className="text-muted" style={{ display: 'block', textAlign: 'center', fontSize: '14px', color: '#94a3b8' }}>No actions available</span>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    ))
+                ) : (
+                    <div className="empty-state">No appointments found in your schedule.</div>
+                )}
+            </div>
         </div>
     );
 };

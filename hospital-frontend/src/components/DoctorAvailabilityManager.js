@@ -89,40 +89,35 @@ const DoctorAvailabilityManager = () => {
                 <button type="submit" className="add-btn">Add Slot</button>
             </form>
 
-            <table className="doctor-table">
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Start Time</th>
-                        <th>End Time</th>
-                        <th>Status</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {slots.length > 0 ? (
-                        slots.map(slot => (
-                            <tr key={slot.id}>
-                                <td>{slot.availableDate}</td>
-                                <td>{slot.startTime}</td>
-                                <td>{slot.endTime}</td>
-                                <td>
-                                    <span className={`status-pill ${slot.booked || slot.isBooked ? 'booked' : 'available'}`}>
-                                        {slot.booked || slot.isBooked ? 'Booked' : 'Available'}
-                                    </span>
-                                </td>
-                                <td>
-                                    {!(slot.booked || slot.isBooked) && (
-                                        <button className="cancel-btn-small" onClick={() => handleDeleteSlot(slot.id)}>Delete</button>
-                                    )}
-                                </td>
-                            </tr>
-                        ))
-                    ) : (
-                        <tr><td colSpan="5" style={{ textAlign: 'center' }}>No availability slots found.</td></tr>
-                    )}
-                </tbody>
-            </table>
+            <div className="availability-grid">
+                {slots.length > 0 ? (
+                    slots.map(slot => (
+                        <div key={slot.id} className="availability-card">
+                            <div className="card-header">
+                                <span className="date-badge">{slot.availableDate}</span>
+                                <span className={`status-pill ${slot.booked || slot.isBooked ? 'booked' : 'available'}`}>
+                                    {slot.booked || slot.isBooked ? 'Booked' : 'Available'}
+                                </span>
+                            </div>
+                            <div className="card-body">
+                                <div className="time-range">
+                                    <span className="time-block">Start: <b>{slot.startTime}</b></span>
+                                    <span className="time-block">End: <b>{slot.endTime}</b></span>
+                                </div>
+                            </div>
+                            <div className="card-footer">
+                                {!(slot.booked || slot.isBooked) ? (
+                                    <button className="delete-btn-modern" onClick={() => handleDeleteSlot(slot.id)}>Delete Slot</button>
+                                ) : (
+                                    <span className="text-muted">Cannot delete (Booked)</span>
+                                )}
+                            </div>
+                        </div>
+                    ))
+                ) : (
+                    <div className="empty-state">No availability slots found.</div>
+                )}
+            </div>
         </div>
     );
 };

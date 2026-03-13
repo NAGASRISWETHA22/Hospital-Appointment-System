@@ -136,50 +136,74 @@ const AdminPanel = ({ mode }) => {
             {mode === 'analytics' && (
                 <div className="analytics-dashboard">
                     <div className="analytics-grid">
-                        <div className="stat-card">
-                            <h4>Total Appointments</h4>
-                            <p className="stat-value">{stats?.totalAppointments || 0}</p>
+                        <div className="stat-card premium-stat">
+                            <div className="stat-icon">📅</div>
+                            <div className="stat-info">
+                                <h4>Total Appointments</h4>
+                                <p className="stat-value">{stats?.totalAppointments || 0}</p>
+                            </div>
                         </div>
-                        <div className="stat-card">
-                            <h4>Total Revenue</h4>
-                            <p className="stat-value">₹{stats?.totalRevenue || 0}</p>
+                        <div className="stat-card premium-stat">
+                            <div className="stat-icon">💰</div>
+                            <div className="stat-info">
+                                <h4>Total Revenue</h4>
+                                <p className="stat-value">₹{stats?.totalRevenue?.toLocaleString() || 0}</p>
+                            </div>
                         </div>
-                        <div className="stat-card">
-                            <h4>Total Doctors</h4>
-                            <p className="stat-value">{stats?.totalDoctors || 0}</p>
+                        <div className="stat-card premium-stat">
+                            <div className="stat-icon">🧑‍⚕️</div>
+                            <div className="stat-info">
+                                <h4>Total Doctors</h4>
+                                <p className="stat-value">{stats?.totalDoctors || 0}</p>
+                            </div>
                         </div>
-                        <div className="stat-card">
-                            <h4>Total Patients</h4>
-                            <p className="stat-value">{stats?.totalPatients || 0}</p>
+                        <div className="stat-card premium-stat">
+                            <div className="stat-icon">👤</div>
+                            <div className="stat-info">
+                                <h4>Total Patients</h4>
+                                <p className="stat-value">{stats?.totalPatients || 0}</p>
+                            </div>
                         </div>
                     </div>
 
-                    <div className="report-sections" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginTop: '30px' }}>
-                        <div className="report-card">
-                            <h4>Revenue per Department</h4>
-                            <table className="mini-table">
-                                <thead>
-                                    <tr><th>Department</th><th>Revenue (Rs.)</th></tr>
-                                </thead>
-                                <tbody>
-                                    {stats?.revenuePerDepartment?.map((row, idx) => (
-                                        <tr key={idx}><td>{row.departmentName}</td><td>Rs. {row.revenue}</td></tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                    <div className="report-sections-modern">
+                        <div className="report-card-premium">
+                            <div className="rc-header">
+                                <h4>Revenue per Department</h4>
+                                <button className="refresh-btn-small" onClick={fetchData}>Export CSV</button>
+                            </div>
+                            <div className="rc-list">
+                                {stats?.revenuePerDepartment?.map((row, idx) => (
+                                    <div key={idx} className="rc-item">
+                                        <div className="rc-item-info">
+                                            <span>{row.departmentName}</span>
+                                            <span className="rc-amount">₹{row.revenue.toLocaleString()}</span>
+                                        </div>
+                                        <div className="rc-progress-bg">
+                                            <div className="rc-progress-bar" style={{ width: `${Math.min(100, (row.revenue / (stats.totalRevenue || 1)) * 100)}%` }}></div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
-                        <div className="report-card">
-                            <h4>Appointments per Doctor</h4>
-                            <table className="mini-table">
-                                <thead>
-                                    <tr><th>Doctor</th><th>Count</th></tr>
-                                </thead>
-                                <tbody>
-                                    {stats?.appointmentsPerDoctor?.map((row, idx) => (
-                                        <tr key={idx}><td>{row.doctorName}</td><td>{row.appointmentCount}</td></tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                        
+                        <div className="report-card-premium">
+                            <div className="rc-header">
+                                <h4>Appointments per Doctor</h4>
+                            </div>
+                            <div className="rc-list">
+                                {stats?.appointmentsPerDoctor?.map((row, idx) => (
+                                    <div key={idx} className="rc-item">
+                                        <div className="rc-item-info">
+                                            <span>Dr. {row.doctorName}</span>
+                                            <span className="rc-count-pill">{row.appointmentCount} Bookings</span>
+                                        </div>
+                                        <div className="rc-progress-bg">
+                                            <div className="rc-progress-bar accent" style={{ width: `${Math.min(100, (row.appointmentCount / (stats.totalAppointments || 1)) * 100)}%` }}></div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -193,96 +217,70 @@ const AdminPanel = ({ mode }) => {
                         <button className="add-btn" onClick={() => setShowModal(true)}>+ Add New Doctor</button>
                     </div>
 
-                    {showModal && (
-                        <div className="modal-backdrop">
-                            <div className="modal-content">
-                                <h3>Add New Doctor</h3>
-                                <form onSubmit={handleAddDoctor}>
-                                    <input type="text" placeholder="Full Name" required value={newDoctor.name} onChange={(e) => setNewDoctor({...newDoctor, name: e.target.value})} />
-                                    <input type="email" placeholder="Email Address" required value={newDoctor.email} onChange={(e) => setNewDoctor({...newDoctor, email: e.target.value})} />
-                                    <input type="password" placeholder="Temporary Password" required value={newDoctor.password} onChange={(e) => setNewDoctor({...newDoctor, password: e.target.value})} />
-                                    <input type="text" placeholder="Specialization (e.g., Cardiologist)" required value={newDoctor.specialization} onChange={(e) => setNewDoctor({...newDoctor, specialization: e.target.value})} />
-                                    <select required value={newDoctor.department.id} onChange={(e) => setNewDoctor({...newDoctor, department: { id: e.target.value }})}>
-                                        <option value="">Select Department</option>
-                                        {departments.map(dept => (
-                                            <option key={dept.id} value={dept.id}>{dept.name}</option>
-                                        ))}
-                                    </select>
-                                    <div className="modal-actions">
-                                        <button type="submit" className="btn-primary">Save Doctor</button>
-                                        <button type="button" className="btn-secondary" onClick={() => setShowModal(false)}>Cancel</button>
-                                    </div>
-                                </form>
+                    <div className="doctor-grid">
+                        {doctors.map(doc => (
+                            <div key={doc.id} className="doctor-card">
+                                <div className="doc-card-header">
+                                    <h4 className="doc-name">{doc.name}</h4>
+                                    <span className="doc-specialty">{doc.specialty || doc.specialization}</span>
+                                </div>
+                                <div className="doc-card-body">
+                                    <p className="doc-dept">🏢 {doc.department?.name || 'Unassigned'}</p>
+                                    <p className="doc-dept" style={{marginTop: '10px'}}>📧 {doc.email}</p>
+                                </div>
+                                <div className="doc-card-footer">
+                                    <button className="delete-btn-modern" onClick={() => handleDeleteDoctor(doc.id)}>Remove Doctor</button>
+                                </div>
                             </div>
-                        </div>
-                    )}
-
-                    
-                    <table className="doctor-table">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Specialization</th>
-                                <th>Department</th>
-                                <th>Email</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {doctors.map(doc => (
-                                <tr key={doc.id}>
-                                    <td>{doc.name}</td>
-                                    <td>{doc.specialization}</td>
-                                    <td>{doc.department?.name || 'N/A'}</td>
-                                    <td>{doc.email}</td>
-                                    <td><button className="cancel-btn-small" onClick={() => handleDeleteDoctor(doc.id)}>Remove</button></td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                        ))}
+                    </div>
 
                     {/* Add Doctor Modal */}
                     {showModal && (
-                        <div className="modal-overlay">
-                            <div className="modal-content">
-                                <h3>Register New Doctor</h3>
-                                <form onSubmit={handleAddDoctor}>
-                                    <div className="form-group">
+                        <div className="modal-overlay" onClick={() => setShowModal(false)}>
+                            <div className="booking-modal premium-modal" onClick={e => e.stopPropagation()}>
+                                <div className="pm-header">
+                                    <h4>Register New Doctor</h4>
+                                    <p className="pm-subtitle">Add a new medical professional to the system</p>
+                                </div>
+                                <form onSubmit={handleAddDoctor} className="booking-form">
+                                    <div className="form-group modern-input-group">
                                         <label>Full Name</label>
                                         <input type="text" required value={newDoctor.name} 
-                                            onChange={(e) => setNewDoctor({...newDoctor, name: e.target.value})} />
+                                            onChange={(e) => setNewDoctor({...newDoctor, name: e.target.value})} placeholder="Dr. First Last" />
                                     </div>
-                                    <div className="form-group">
+                                    <div className="form-group modern-input-group">
                                         <label>Email Address</label>
                                         <input type="email" required value={newDoctor.email} 
-                                            onChange={(e) => setNewDoctor({...newDoctor, email: e.target.value})} />
+                                            onChange={(e) => setNewDoctor({...newDoctor, email: e.target.value})} placeholder="doctor@hospital.com" />
                                     </div>
-                                    <div className="form-group">
+                                    <div className="form-group modern-input-group">
                                         <label>Password</label>
                                         <input type="password" required value={newDoctor.password} 
-                                            onChange={(e) => setNewDoctor({...newDoctor, password: e.target.value})} />
+                                            onChange={(e) => setNewDoctor({...newDoctor, password: e.target.value})} placeholder="••••••••" />
                                     </div>
-                                    <div className="form-group">
+                                    <div className="form-group modern-input-group">
                                         <label>Department</label>
                                         <select 
                                             required 
                                             value={newDoctor.department.id} 
                                             onChange={(e) => setNewDoctor({...newDoctor, department: { id: e.target.value }})}
+                                            style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '2px solid #e2e8f0', fontFamily: 'inherit' }}
                                         >
-                                            <option value="">Select Department</option>
+                                            <option value="">Select Department...</option>
                                             {departments.map(dept => (
                                                 <option key={dept.id} value={dept.id}>{dept.name}</option>
                                             ))}
                                         </select>
                                     </div>
-                                    <div className="form-group">
+                                    <div className="form-group modern-input-group">
                                         <label>Specialization</label>
                                         <input type="text" required value={newDoctor.specialization} placeholder="e.g. Cardiology"
                                             onChange={(e) => setNewDoctor({...newDoctor, specialization: e.target.value})} />
                                     </div>
-                                    <div className="modal-actions">
-                                        <button type="submit" className="confirm-btn-small">Add Doctor</button>
-                                        <button type="button" className="cancel-btn-small" onClick={() => setShowModal(false)}>Cancel</button>
+                                    <div className="modal-actions row-actions">
+                                        <button type="button" className="cancel-btn" onClick={() => setShowModal(false)}>Cancel</button>
+                                        <button type="submit" className="confirm-btn">Register Doctor</button>
                                     </div>
                                 </form>
                             </div>
@@ -298,49 +296,48 @@ const AdminPanel = ({ mode }) => {
                         <h3>Hospital Departments</h3>
                         <button className="add-btn" onClick={() => setShowDeptModal(true)}>+ Add New Department</button>
                     </div>
-                    
-                    <table className="doctor-table">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Description</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {departments.map(dept => (
-                                <tr key={dept.id}>
-                                    <td>{dept.name}</td>
-                                    <td>{dept.description}</td>
-                                    <td>
-                                        <button className="cancel-btn-small" onClick={() => handleDeleteDept(dept.id)}>
-                                            Remove
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                    <div className="doctor-grid">
+                        {departments.map(dept => (
+                            <div key={dept.id} className="doctor-card">
+                                <div className="doc-card-header">
+                                    <h4 className="doc-name">{dept.name}</h4>
+                                </div>
+                                <div className="doc-card-body">
+                                    <p style={{ color: '#475569', fontSize: '14px', margin: 0 }}>{dept.description}</p>
+                                </div>
+                                <div className="doc-card-footer">
+                                    <button className="delete-btn-modern" onClick={() => handleDeleteDept(dept.id)}>
+                                        Remove Department
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
 
                     {/* Add Department Modal */}
                     {showDeptModal && (
-                        <div className="modal-overlay">
-                            <div className="modal-content">
-                                <h3>Create New Department</h3>
-                                <form onSubmit={handleAddDept}>
-                                    <div className="form-group">
+                        <div className="modal-overlay" onClick={() => setShowDeptModal(false)}>
+                            <div className="booking-modal premium-modal" onClick={e => e.stopPropagation()}>
+                                <div className="pm-header">
+                                    <h4>Create New Department</h4>
+                                    <p className="pm-subtitle">Add a new specialty wing to the hospital</p>
+                                </div>
+                                <form onSubmit={handleAddDept} className="booking-form">
+                                    <div className="form-group modern-input-group">
                                         <label>Department Name</label>
-                                        <input type="text" required value={newDept.name} 
+                                        <input type="text" required value={newDept.name} placeholder="e.g. Neurology"
                                             onChange={(e) => setNewDept({...newDept, name: e.target.value})} />
                                     </div>
-                                    <div className="form-group">
+                                    <div className="form-group modern-input-group">
                                         <label>Description</label>
-                                        <textarea required value={newDept.description} 
-                                            onChange={(e) => setNewDept({...newDept, description: e.target.value})} />
+                                        <textarea required value={newDept.description} placeholder="Short description of department..."
+                                            onChange={(e) => setNewDept({...newDept, description: e.target.value})} 
+                                            style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '2px solid #e2e8f0', fontFamily: 'inherit', resize: 'vertical' }}
+                                        />
                                     </div>
-                                    <div className="modal-actions">
-                                        <button type="submit" className="confirm-btn-small">Add Department</button>
-                                        <button type="button" className="cancel-btn-small" onClick={() => setShowDeptModal(false)}>Cancel</button>
+                                    <div className="modal-actions row-actions">
+                                        <button type="button" className="cancel-btn" onClick={() => setShowDeptModal(false)}>Cancel</button>
+                                        <button type="submit" className="confirm-btn">Add Department</button>
                                     </div>
                                 </form>
                             </div>
@@ -353,32 +350,25 @@ const AdminPanel = ({ mode }) => {
             {mode === 'all-appointments' && (
                 <div className="manage-section">
                     <h3>All Hospital Bookings</h3>
-                    <table className="doctor-table">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Patient</th>
-                                <th>Doctor</th>
-                                <th>Status</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {appointments.map(app => (
-                                <tr key={app.id}>
-                                    <td>{app.id}</td>
-                                    <td>{app.patient?.name}</td>
-                                    <td>{app.doctor?.name}</td>
-                                    <td><span className={`status-pill ${app.status?.toLowerCase()}`}>{app.status}</span></td>
-                                    <td>
-                                        <button className="cancel-btn-small" onClick={() => handleCancel(app.id)}>
-                                            Cancel Booking
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                    <div className="availability-grid">
+                        {appointments.map(app => (
+                            <div key={app.id} className="availability-card">
+                                <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <span className="date-badge">Booking #{app.id}</span>
+                                    <span className={`status-pill ${app.status?.toLowerCase()}`}>{app.status}</span>
+                                </div>
+                                <div className="card-body">
+                                    <p className="doc-dept" style={{marginBottom: '8px'}}>🧑 <b>Patient:</b> {app.patient?.name}</p>
+                                    <p className="doc-dept">🩺 <b>Doctor:</b> {app.doctor?.name}</p>
+                                </div>
+                                <div className="card-footer">
+                                    <button className="delete-btn-modern" onClick={() => handleCancel(app.id)}>
+                                        Cancel Booking (Admin Override)
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             )}
         </div>
