@@ -34,7 +34,7 @@ public class DoctorAvailability {
     @Column(nullable = false)
     private LocalTime endTime;
 
-    @Column(nullable = false)
+    @Column(name = "is_booked", nullable = false)
     private boolean booked = false;
-   
+
 }
