@@ -10,6 +10,6 @@ WORKDIR /hospital
 
 COPY --from=build /hospital/target/*.jar app.jar
 
-EXPOSE 9090
+EXPOSE 8080
 
 ENTRYPOINT ["java", "-jar", "app.jar"]

@@ -13,7 +13,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/availability")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*") // Allows local development with different ports
+//@CrossOrigin(origins = "*") // Allows local development with different ports
 public class DoctorAvailabilityController {
 
     private final DoctorAvailabilityService availabilityService;
