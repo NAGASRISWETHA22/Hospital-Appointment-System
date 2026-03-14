@@ -46,12 +46,12 @@ public class SecurityConfig {
                         .authenticated()
 
                         // Appointment Features - Fixed 403 Forbidden
-                        .requestMatchers("/api/appointments/book").hasRole("PATIENT")
-                        .requestMatchers("/api/appointments/patient/**").hasRole("PATIENT")
-                        .requestMatchers("/api/appointments/doctor/**").hasRole("DOCTOR")
-                        .requestMatchers("/api/appointments/status/**").hasAnyRole("DOCTOR", "ADMIN", "PATIENT")
-                        .requestMatchers("/api/appointments/all").hasRole("ADMIN")
-                        .requestMatchers("/api/appointments/delete/**").hasRole("ADMIN")
+                        .requestMatchers("/api/appointments/book").hasAnyAuthority("PATIENT","ROLE_PATIENT")
+                        .requestMatchers("/api/appointments/patient/**").hasAnyAuthority("PATIENT","ROLE_PATIENT")
+                        .requestMatchers("/api/appointments/doctor/**").hasAnyAuthority("DOCTOR","ROLE_DOCTOR")
+                        .requestMatchers("/api/appointments/status/**").hasAnyRole("DOCTOR", "ADMIN", "PATIENT","ROLE_DOCTOR", "ROLE_ADMIN", "ROLE_PATIENT")
+                        .requestMatchers("/api/appointments/all").hasAnyAuthority("ADMIN","ROLE_ADMIN")
+                        .requestMatchers("/api/appointments/delete/**").hasAnyAuthority("ADMIN","ROLE_ADMIN")
 
                         // Review Features
                         .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/reviews/**").hasRole("PATIENT")
