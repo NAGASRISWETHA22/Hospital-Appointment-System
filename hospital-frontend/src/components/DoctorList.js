@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useMemo } from 'react';
 import { getAllDoctors } from '../services/userService';
 import { AuthContext } from '../context/AuthContext';
 import { bookAppointment } from '../services/appointmentService';
@@ -7,22 +7,20 @@ import { getReviewsByDoctor } from '../services/reviewService';
 import API from '../services/api';
 
 const DoctorList = () => {
+    const { user } = useContext(AuthContext);
     const [doctors, setDoctors] = useState([]);
     const [departments, setDepartments] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedDept, setSelectedDept] = useState('');
     const [searchDate, setSearchDate] = useState('');
-    const [sourceForFiltering, setSourceForFiltering] = useState([]);
-    const [dateFilteredDoctors, setDateFilteredDoctors] = useState([]);
+    
     const [loading, setLoading] = useState(true);
     const [selectedDoctor, setSelectedDoctor] = useState(null);
     const [viewingProfile, setViewingProfile] = useState(null);
     const [doctorReviews, setDoctorReviews] = useState([]);
     const [availableSlots, setAvailableSlots] = useState([]);
     const [fetchingSlots, setFetchingSlots] = useState(false);
-    const { user } = useContext(AuthContext);
 
-    // Booking state
     const [bookingData, setBookingData] = useState({
         date: '',
         slot: null
@@ -32,11 +30,12 @@ const DoctorList = () => {
         fetchInitialData();
     }, []);
 
+    // Effect to fetch doctors specifically available on a certain date
     useEffect(() => {
         if (searchDate) {
             handleDateSearch();
         } else {
-            setSourceForFiltering(doctors); // Reset to all doctors if date is cleared
+            fetchAllDoctorsOnly();
         }
     }, [searchDate]);
 
@@ -48,23 +47,32 @@ const DoctorList = () => {
                 getAllDepartments()
             ]);
             setDoctors(docRes.data || []);
-            setSourceForFiltering(docRes.data || []); // Initialize source
             setDepartments(deptRes.data || []);
         } catch (err) {
-            console.error("Failed to fetch data:", err);
+            console.error("Failed to fetch initial data:", err);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const fetchAllDoctorsOnly = async () => {
+        try {
+            const res = await getAllDoctors();
+            setDoctors(res.data || []);
+        } catch (err) {
+            console.error("Failed to fetch doctors:", err);
         }
     };
 
     const handleDateSearch = async () => {
         setLoading(true);
         try {
-            const res = await API.get(`/doctors/available-on?date=${searchDate}`);
-            setSourceForFiltering(res.data || []);
+            // Updated endpoint to match standard availability search
+            const res = await API.get(`/api/availability/available-on?date=${searchDate}`);
+            setDoctors(res.data || []);
         } catch (err) {
             console.error("Failed to fetch doctors by date:", err);
-            setSourceForFiltering([]); // Clear results on error
+            setDoctors([]); 
         } finally {
             setLoading(false);
         }
@@ -85,9 +93,9 @@ const DoctorList = () => {
         if (!date) return;
         setFetchingSlots(true);
         try {
-            const res = await API.get(`/availability/doctor/${doctorId}/date?date=${date}`);
-            // Check both 'booked' and 'isBooked' to be safe
-            setAvailableSlots(res.data.filter(s => s.booked === false || s.isBooked === false));
+            const res = await API.get(`/api/availability/doctor/${doctorId}/date?date=${date}`);
+            // Logic Fix: Only show slots that are specifically marked as NOT booked
+            setAvailableSlots(res.data.filter(s => !s.booked));
         } catch (err) {
             console.error("Failed to fetch slots:", err);
             setAvailableSlots([]);
@@ -112,24 +120,30 @@ const DoctorList = () => {
         };
 
         try {
-            console.log("Booking Request:", requestBody);
             await bookAppointment(requestBody);
-            alert(`Appointment requested with ${selectedDoctor.name}!`);
-            setSelectedDoctor(null); // Modal-a close panna
+            alert(`Appointment requested successfully with Dr. ${selectedDoctor.name}!`);
+            setSelectedDoctor(null); 
+            setBookingData({ date: '', slot: null });
         } catch (err) {
             alert("Booking failed: " + (err.response?.data || err.message));
         }
     };
 
-    // Filter doctors based on search (Name or Specialization) and Department
-    const filteredDoctors = sourceForFiltering.filter(doctor => {
-        const matchesSearch = doctor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            (doctor.specialization && doctor.specialization.toLowerCase().includes(searchTerm.toLowerCase()));
-        const matchesDept = selectedDept === '' || doctor.department?.id === parseInt(selectedDept);
-        return matchesSearch && matchesDept;
-    });
+    // useMemo for performance: Only re-calculates when search/filters change
+    const filteredDoctors = useMemo(() => {
+        return doctors.filter(doctor => {
+            const name = doctor.name?.toLowerCase() || "";
+            const spec = doctor.specialization?.toLowerCase() || "";
+            const term = searchTerm.toLowerCase();
 
-    if (loading) return <p className="loading-text">Loading doctors...</p>;
+            const matchesSearch = name.includes(term) || spec.includes(term);
+            const matchesDept = selectedDept === '' || doctor.department?.id === parseInt(selectedDept);
+            
+            return matchesSearch && matchesDept;
+        });
+    }, [doctors, searchTerm, selectedDept]);
+
+    if (loading) return <div className="loading-spinner">Loading doctor information...</div>;
 
     return (
         <div className="info-section">
@@ -153,7 +167,7 @@ const DoctorList = () => {
                         </select>
                     </div>
                     <div className="filter-item">
-                        <label>Availability</label>
+                        <label>Date Availability</label>
                         <input 
                             type="date"
                             className="premium-date"
@@ -181,11 +195,11 @@ const DoctorList = () => {
                         <div key={doctor.id} className="doctor-card">
                             <div className="doc-card-header">
                                 <h4 onClick={() => fetchDoctorProfile(doctor)} className="doc-name">{doctor.name}</h4>
-                                <span className="doc-specialty">{doctor.specialization || 'General'}</span>
+                                <span className="doc-specialty">{doctor.specialization || 'General Practitioner'}</span>
                             </div>
                             <div className="doc-card-body">
                                 <p className="doc-dept">
-                                    <i className="dept-icon">🏢</i> {doctor.department?.name || 'General Department'}
+                                    <i className="dept-icon">🏢</i> {doctor.department?.name || 'General Clinic'}
                                 </p>
                             </div>
                             <div className="doc-card-footer">
@@ -202,7 +216,7 @@ const DoctorList = () => {
                 )}
             </div>
 
-            {/* Doctor Profile Modal */}
+            {/* Profile Modal */}
             {viewingProfile && (
                 <div className="modal-overlay" onClick={() => setViewingProfile(null)}>
                     <div className="booking-modal profile-modal premium-modal" onClick={e => e.stopPropagation()}>
@@ -228,28 +242,28 @@ const DoctorList = () => {
                                         </div>
                                     ))
                                 ) : (
-                                    <div className="empty-reviews">No reviews yet.</div>
+                                    <div className="empty-reviews">No reviews yet for this doctor.</div>
                                 )}
                             </div>
                         </div>
                         <div className="modal-actions">
-                            <button className="cancel-btn" onClick={() => setViewingProfile(null)}>Close Profile</button>
+                            <button className="cancel-btn" onClick={() => setViewingProfile(null)}>Close</button>
                         </div>
                     </div>
                 </div>
             )}
 
-            {/* Booking Modal Overlay */}
+            {/* Booking Modal */}
             {selectedDoctor && (
                 <div className="modal-overlay" onClick={() => setSelectedDoctor(null)}>
                     <div className="booking-modal premium-modal" onClick={e => e.stopPropagation()}>
                         <div className="pm-header">
-                            <h4>Book with {selectedDoctor.name}</h4>
-                            <p className="pm-subtitle">Select a suitable date and time</p>
+                            <h4>Book with Dr. {selectedDoctor.name}</h4>
+                            <p className="pm-subtitle">Select your preferred time slot</p>
                         </div>
                         <form onSubmit={handleBookingSubmit} className="booking-form">
                             <div className="form-group modern-input-group">
-                                <label>Date</label>
+                                <label>Appointment Date</label>
                                 <input type="date" required 
                                     min={new Date().toISOString().split('T')[0]} 
                                     value={bookingData.date}
@@ -264,7 +278,7 @@ const DoctorList = () => {
                             <div className="form-group">
                                 <label>Available Slots</label>
                                 {fetchingSlots ? (
-                                    <div className="loading-spinner">Loading slots...</div>
+                                    <div className="loading-spinner">Fetching slots...</div>
                                 ) : (
                                     <div className="slot-grid modern-slot-grid">
                                         {availableSlots.length > 0 ? (
@@ -273,12 +287,12 @@ const DoctorList = () => {
                                                     className={`slot-pill ${bookingData.slot?.id === slot.id ? 'selected' : ''}`}
                                                     onClick={() => setBookingData({...bookingData, slot})}
                                                 >
-                                                    {slot.startTime} - {slot.endTime}
+                                                    {slot.startTime.substring(0,5)} - {slot.endTime.substring(0,5)}
                                                 </button>
                                             ))
                                         ) : (
                                             <div className="empty-slots">
-                                                {bookingData.date ? 'No slots available for this date.' : 'Please select a date first.'}
+                                                {bookingData.date ? 'No free slots on this day.' : 'Select a date to view slots.'}
                                             </div>
                                         )}
                                     </div>

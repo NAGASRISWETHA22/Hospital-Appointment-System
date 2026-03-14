@@ -5,19 +5,21 @@
   justify-content: center;
   background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
   font-family: 'Inter', sans-serif;
+  padding: 20px; /* Mobile screens-la card ottama irukka */
 }
 
 .auth-card {
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  padding: 48px 40px;
-  border-radius: 20px;
+  padding: 40px;
+  border-radius: 24px;
   box-shadow: 0 20px 40px rgba(0,0,0,0.08);
   width: 100%;
   max-width: 420px;
   text-align: center;
   animation: slideUp 0.5s ease-out;
+  box-sizing: border-box; /* Padding calculate panna */
 }
 
 @keyframes slideUp {
@@ -32,14 +34,14 @@
 .auth-header h2 {
   color: #1e293b;
   margin: 0 0 8px;
-  font-size: 32px;
+  font-size: 28px;
   font-weight: 800;
   letter-spacing: -1px;
 }
 
 .auth-header p {
   color: #64748b;
-  font-size: 16px;
+  font-size: 15px;
   margin: 0;
 }
 
@@ -52,19 +54,23 @@
 }
 
 .input-group label {
-    font-size: 14px;
-    font-weight: 600;
+    font-size: 13px;
+    font-weight: 700;
     color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .auth-card input {
   padding: 14px 16px;
   border: 2px solid #f1f5f9;
   border-radius: 12px;
-  font-size: 1rem;
+  font-size: 16px;
   transition: all 0.2s;
   background-color: #f8fafc;
   color: #1e293b;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .auth-card input:focus {
@@ -75,6 +81,7 @@
 }
 
 .auth-btn {
+  width: 100%;
   padding: 14px;
   background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
   color: white;
@@ -88,9 +95,15 @@
   box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.2);
 }
 
-.auth-btn:hover {
+.auth-btn:hover:not(:disabled) {
   transform: translateY(-2px);
   box-shadow: 0 20px 25px -5px rgba(37, 99, 235, 0.3);
+}
+
+.auth-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  filter: grayscale(0.5);
 }
 
 .auth-footer {
@@ -100,26 +113,28 @@
 }
 
 .auth-footer p {
-  margin: 0 0 16px;
+  margin: 0 0 12px;
   color: #64748b;
   font-size: 14px;
 }
 
-.auth-footer a {
-  color: #2563eb;
-  text-decoration: none;
-  font-weight: 700;
-  transition: color 0.2s;
-}
-
 .back-home {
-    display: block;
-    margin-top: 16px;
+    display: inline-block;
+    margin-top: 12px;
     font-size: 13px;
     color: #94a3b8 !important;
     font-weight: 500 !important;
+    text-decoration: none;
 }
 
-.back-home:hover {
-    color: #64748b !important;
+/* Mobile Responsiveness */
+@media (max-width: 480px) {
+  .auth-card {
+    padding: 32px 24px;
+    border-radius: 16px;
+  }
+  
+  .auth-header h2 {
+    font-size: 24px;
+  }
 }

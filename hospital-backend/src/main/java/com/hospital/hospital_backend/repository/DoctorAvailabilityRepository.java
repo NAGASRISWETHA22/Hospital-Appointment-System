@@ -6,17 +6,22 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface DoctorAvailabilityRepository extends JpaRepository<DoctorAvailability, Long> {
-    List<DoctorAvailability> findByDoctor_IdAndAvailableDateGreaterThanEqual(Long doctorId, LocalDate date);
 
-    List<DoctorAvailability> findByDoctor_IdAndAvailableDate(Long doctorId, LocalDate date);
-
+    // For Doctor Dashboard
     List<DoctorAvailability> findByDoctor_IdOrderByAvailableDateDesc(Long doctorId);
 
+    // For Patient Booking (Hide booked slots)
+    List<DoctorAvailability> findByDoctor_IdAndAvailableDateAndIsBookedFalse(Long doctorId, LocalDate date);
+
+    // Logic checks
+    boolean existsByDoctor_IdAndAvailableDateAndStartTime(Long doctorId, LocalDate date, LocalTime startTime);
+
     Optional<DoctorAvailability> findByDoctorAndAvailableDateAndStartTime(User doctor, LocalDate availableDate,
-            java.time.LocalTime startTime);
+            LocalTime startTime);
 }

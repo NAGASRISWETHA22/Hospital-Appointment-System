@@ -13,12 +13,13 @@ const DoctorAvailabilityManager = () => {
     });
 
     useEffect(() => {
-        fetchSlots();
-    }, []);
+        if (user && user.id) {
+            fetchSlots();
+        }
+    }, [user]);
 
     const fetchSlots = async () => {
         try {
-            // setLoading(true); // Don't show global loading when just refreshing the list
             const res = await API.get(`/availability/doctor/${user.id}`);
             setSlots(res.data);
         } catch (err) {
@@ -30,19 +31,28 @@ const DoctorAvailabilityManager = () => {
 
     const handleAddSlot = async (e) => {
         e.preventDefault();
+        
+        // Validation: End time should be after start time
+        if (newSlot.startTime >= newSlot.endTime) {
+            alert('End time must be after start time');
+            return;
+        }
+
         try {
             await API.post('/availability', {
-                doctor: { id: user.id },
+                doctor: { id: user.id }, // Matches backend expectations
                 availableDate: newSlot.availableDate,
-                startTime: newSlot.startTime,
-                endTime: newSlot.endTime,
+                startTime: newSlot.startTime + ":00", // Format for LocalTime
+                endTime: newSlot.endTime + ":00",
                 booked: false
             });
             alert('Slot added successfully!');
             setNewSlot({ availableDate: '', startTime: '', endTime: '' });
             fetchSlots();
         } catch (err) {
-            alert('Failed to add slot');
+            // Display specific error message from backend if available
+            const errorMsg = err.response?.data || 'Failed to add slot';
+            alert(errorMsg);
         }
     };
 
@@ -66,27 +76,36 @@ const DoctorAvailabilityManager = () => {
                 <h3>Manage Availability Slots</h3>
             </div>
 
-            <form onSubmit={handleAddSlot} className="availability-form" style={{ marginBottom: '20px', display: 'flex', gap: '10px' }}>
-                <input 
-                    type="date" 
-                    required 
-                    min={new Date().toISOString().split('T')[0]}
-                    value={newSlot.availableDate}
-                    onChange={(e) => setNewSlot({...newSlot, availableDate: e.target.value})}
-                />
-                <input 
-                    type="time" 
-                    required 
-                    value={newSlot.startTime}
-                    onChange={(e) => setNewSlot({...newSlot, startTime: e.target.value})}
-                />
-                <input 
-                    type="time" 
-                    required 
-                    value={newSlot.endTime}
-                    onChange={(e) => setNewSlot({...newSlot, endTime: e.target.value})}
-                />
-                <button type="submit" className="add-btn">Add Slot</button>
+            <form onSubmit={handleAddSlot} className="availability-form" style={{ marginBottom: '20px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                <div className="input-group">
+                    <label>Date:</label>
+                    <input 
+                        type="date" 
+                        required 
+                        min={new Date().toISOString().split('T')[0]}
+                        value={newSlot.availableDate}
+                        onChange={(e) => setNewSlot({...newSlot, availableDate: e.target.value})}
+                    />
+                </div>
+                <div className="input-group">
+                    <label>Start Time:</label>
+                    <input 
+                        type="time" 
+                        required 
+                        value={newSlot.startTime}
+                        onChange={(e) => setNewSlot({...newSlot, startTime: e.target.value})}
+                    />
+                </div>
+                <div className="input-group">
+                    <label>End Time:</label>
+                    <input 
+                        type="time" 
+                        required 
+                        value={newSlot.endTime}
+                        onChange={(e) => setNewSlot({...newSlot, endTime: e.target.value})}
+                    />
+                </div>
+                <button type="submit" className="add-btn" style={{ marginTop: '24px' }}>Add Slot</button>
             </form>
 
             <div className="availability-grid">
@@ -95,18 +114,18 @@ const DoctorAvailabilityManager = () => {
                         <div key={slot.id} className="availability-card">
                             <div className="card-header">
                                 <span className="date-badge">{slot.availableDate}</span>
-                                <span className={`status-pill ${slot.booked || slot.isBooked ? 'booked' : 'available'}`}>
-                                    {slot.booked || slot.isBooked ? 'Booked' : 'Available'}
+                                <span className={`status-pill ${slot.booked ? 'booked' : 'available'}`}>
+                                    {slot.booked ? 'Booked' : 'Available'}
                                 </span>
                             </div>
                             <div className="card-body">
                                 <div className="time-range">
-                                    <span className="time-block">Start: <b>{slot.startTime}</b></span>
-                                    <span className="time-block">End: <b>{slot.endTime}</b></span>
+                                    <span className="time-block">Start: <b>{slot.startTime.substring(0, 5)}</b></span>
+                                    <span className="time-block">End: <b>{slot.endTime.substring(0, 5)}</b></span>
                                 </div>
                             </div>
                             <div className="card-footer">
-                                {!(slot.booked || slot.isBooked) ? (
+                                {!slot.booked ? (
                                     <button className="delete-btn-modern" onClick={() => handleDeleteSlot(slot.id)}>Delete Slot</button>
                                 ) : (
                                     <span className="text-muted">Cannot delete (Booked)</span>

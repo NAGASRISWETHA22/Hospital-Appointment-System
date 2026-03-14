@@ -23,46 +23,52 @@ public class SecurityConfig {
 
     private final JwtFilter jwtFilter;
 
-    // 1. AuthenticationManager Bean
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
 
-    // 2. Security Filter Chain configuration
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
-                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Explicitly use our CORS bean
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll() // Allow preflight
-                        .requestMatchers("/api/auth/**").permitAll() // Login/Register routes are public
-                        
+                        .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
+                        .requestMatchers("/api/auth/**").permitAll()
+
+                        // Availability Features (Crucial Fix)
+                        // Doctors can POST/DELETE, Everyone can GET
+                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/availability/**")
+                        .hasRole("DOCTOR")
+                        .requestMatchers(org.springframework.http.HttpMethod.DELETE, "/api/availability/**")
+                        .hasRole("DOCTOR")
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/availability/**")
+                        .authenticated()
+
                         // Patient Features
                         .requestMatchers("/api/appointments/book").hasRole("PATIENT")
-                        .requestMatchers("/api/appointments/patient", "/api/appointments/patient/**").hasRole("PATIENT")
-                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/reviews", "/api/reviews/**").hasRole("PATIENT")
-                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/reviews", "/api/reviews/**").permitAll()
-                        
+                        .requestMatchers("/api/appointments/patient/**").hasRole("PATIENT")
+                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/reviews/**").hasRole("PATIENT")
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/reviews/**").permitAll()
+
                         // Doctor Features
-                        .requestMatchers("/api/availability", "/api/availability/**").hasAnyRole("DOCTOR", "PATIENT", "ADMIN")
-                        .requestMatchers("/api/appointments/doctor", "/api/appointments/doctor/**").hasRole("DOCTOR")
-                        .requestMatchers("/api/appointments/*/status").hasAnyRole("DOCTOR", "ADMIN", "PATIENT")
-                        
-                        // Admin Features
-                        .requestMatchers("/api/departments", "/api/departments/**").hasAnyRole("ADMIN", "PATIENT", "DOCTOR")
-                        .requestMatchers("/api/analytics", "/api/analytics/**").hasRole("ADMIN")
+                        .requestMatchers("/api/appointments/doctor/**").hasRole("DOCTOR")
+                        .requestMatchers("/api/appointments/*/status").hasAnyRole("DOCTOR", "ADMIN")
+
+                        // Shared & Admin Features
+                        .requestMatchers("/api/departments/**").permitAll() // Let anyone see departments
+                        .requestMatchers("/api/analytics/**").hasRole("ADMIN")
                         .requestMatchers("/api/auth/register-doctor").hasRole("ADMIN")
-                        .requestMatchers("/api/users", "/api/users/**").hasRole("ADMIN")
-                        
-                        .anyRequest().authenticated()) // Others need authentication
-                .addFilterBefore(jwtFilter, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);
+                        .requestMatchers("/api/users/**").hasRole("ADMIN")
+
+                        .anyRequest().authenticated())
+                .addFilterBefore(jwtFilter,
+                        org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
-    // 3. Password Encoder Bean
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -72,9 +78,9 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // Allow all Vercel preview/production URLs for this project + localhost
-        configuration.setAllowedOriginPatterns(Arrays.asList(              
-              "http://localhost:3000",
+        // Keep your existing Vercel patterns - they are perfect for deployment
+        configuration.setAllowedOriginPatterns(Arrays.asList(
+                "http://localhost:3000",
                 "https://hospital-appoint-*.vercel.app",
                 "https://hospital-appointment-system-*.vercel.app",
                 "https://*-nagasriswetha*.vercel.app",
@@ -85,7 +91,7 @@ public class SecurityConfig {
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setExposedHeaders(Arrays.asList("Authorization", "Content-Type"));
         configuration.setAllowCredentials(true);
-        configuration.setMaxAge(3600L); // Cache preflight for 1 hour
+        configuration.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);

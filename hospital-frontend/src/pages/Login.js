@@ -1,39 +1,22 @@
-import React, { useState, useContext } from 'react';
+import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { login } from '../services/userService';
-import { AuthContext } from '../context/AuthContext';
+import { register } from '../services/userService';
 import './Auth.css';
 
-const Login = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false); // Loading state for better UX
-  const { loginUser } = useContext(AuthContext);
+const Register = () => {
+  const [formData, setFormData] = useState({ name: '', email: '', password: '', role: 'PATIENT' });
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleLogin = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    
-    console.log("Attempting login for:", email); // Debugging: Check if email is correct
-
     try {
-      const response = await login({ email, password });
-      
-      console.log("Login Success Response:", response.data);
-
-      // Backend response structure: { id, name, email, role, token }
-      // response.data-ve oru object dhaan, adhu kulla dhaan token irukku
-      loginUser(response.data, response.data.token); 
-      
-      alert('Login Successful!');
-      navigate('/dashboard');
+      await register(formData);
+      alert('Registration Successful! Please Login.');
+      navigate('/login');
     } catch (err) {
-      console.error("Login Error Details:", err.response);
-      
-      // Detailed error message from backend if available
-      const errMsg = err.response?.data || 'Invalid Email or Password';
-      alert('Login Failed: ' + errMsg);
+      alert('Registration Failed: ' + (err.response?.data || 'Error'));
     } finally {
       setLoading(false);
     }
@@ -43,19 +26,28 @@ const Login = () => {
     <div className="auth-container">
       <div className="auth-card">
         <div className="auth-header">
-          <h2>Welcome Back</h2>
-          <p>Please enter your details to login</p>
+          <h2>Join CareHub</h2>
+          <p>Create an account to manage your health</p>
         </div>
-        
-        <form onSubmit={handleLogin}>
+
+        <form onSubmit={handleSubmit}>
+          <div className="input-group">
+            <label>Full Name</label>
+            <input 
+              type="text" 
+              placeholder="Enter your full name" 
+              required 
+              onChange={(e) => setFormData({...formData, name: e.target.value})} 
+            />
+          </div>
+          
           <div className="input-group">
             <label>Email Address</label>
             <input 
               type="email" 
               placeholder="name@gmail.com" 
               required 
-              value={email}
-              onChange={(e) => setEmail(e.target.value)} 
+              onChange={(e) => setFormData({...formData, email: e.target.value})} 
             />
           </div>
           
@@ -65,18 +57,17 @@ const Login = () => {
               type="password" 
               placeholder="••••••••" 
               required 
-              value={password}
-              onChange={(e) => setPassword(e.target.value)} 
+              onChange={(e) => setFormData({...formData, password: e.target.value})} 
             />
           </div>
-          
+
           <button type="submit" className="auth-btn" disabled={loading}>
-            {loading ? 'Logging in...' : 'Login'}
+            {loading ? 'Creating Account...' : 'Sign Up'}
           </button>
         </form>
-        
+
         <div className="auth-footer">
-          <p>New here? <Link to="/register">Create Account</Link></p>
+          <p>Already have an account? <Link to="/login">Login</Link></p>
           <Link to="/" className="back-home">Back to Home</Link>
         </div>
       </div>
@@ -84,4 +75,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default Register;

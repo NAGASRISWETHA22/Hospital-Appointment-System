@@ -19,25 +19,26 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        log.info("Checking if default departments need to be initialized...");
-        
-        if (departmentRepository.count() == 0) {
-            log.info("No departments found. Initializing default departments...");
+        log.info("Checking and updating default departments...");
+
+        List<Department> departmentsToInitialize = Arrays.asList(
+                new Department(null, "Cardiology", "Heart and cardiovascular system care"),
+                new Department(null, "Neurology", "Nervous system and brain disorders"),
+                new Department(null, "Pediatrics", "Medical care for infants, children, and adolescents"),
+                new Department(null, "Orthopedics", "Bones, joints, ligaments, tendons, and muscles"),
+                new Department(null, "Dermatology", "Skin, hair, and nail conditions"),
+                new Department(null, "General Surgery", "Surgical treatment of a broad range of diseases"),
+                new Department(null, "Psychiatry", "Mental health and behavioral disorders")
+        );
+
+        for (Department dept : departmentsToInitialize) {
             
-            List<Department> defaultDepartments = Arrays.asList(
-                    new Department(null, "Cardiology", "Heart and cardiovascular system care"),
-                    new Department(null, "Neurology", "Nervous system and brain disorders"),
-                    new Department(null, "Pediatrics", "Medical care for infants, children, and adolescents"),
-                    new Department(null, "Orthopedics", "Bones, joints, ligaments, tendons, and muscles"),
-                    new Department(null, "Dermatology", "Skin, hair, and nail conditions"),
-                    new Department(null, "General Surgery", "Surgical treatment of a broad range of diseases"),
-                    new Department(null, "Psychiatry", "Mental health and behavioral disorders")
-            );
-            
-            departmentRepository.saveAll(defaultDepartments);
-            log.info("Successfully initialized {} default departments.", defaultDepartments.size());
-        } else {
-            log.info("Departments already exist. Skipping initialization.");
+            if (!departmentRepository.existsByName(dept.getName())) {
+                departmentRepository.save(dept);
+                log.info("Added new department: {}", dept.getName());
+            }
         }
+        
+        log.info("Department check complete.");
     }
 }

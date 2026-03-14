@@ -13,14 +13,18 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/availability")
 @RequiredArgsConstructor
-// @CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "*") // Allows local development with different ports
 public class DoctorAvailabilityController {
 
     private final DoctorAvailabilityService availabilityService;
 
     @PostMapping
-    public ResponseEntity<DoctorAvailability> addAvailability(@RequestBody DoctorAvailability availability) {
-        return ResponseEntity.ok(availabilityService.addAvailability(availability));
+    public ResponseEntity<?> addAvailability(@RequestBody DoctorAvailability availability) {
+        try {
+            return ResponseEntity.ok(availabilityService.addAvailability(availability));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @GetMapping("/doctor/{doctorId}")
