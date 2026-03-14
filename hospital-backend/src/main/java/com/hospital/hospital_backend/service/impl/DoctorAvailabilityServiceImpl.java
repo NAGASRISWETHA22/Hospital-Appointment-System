@@ -22,42 +22,38 @@ public class DoctorAvailabilityServiceImpl implements DoctorAvailabilityService 
     @Override
     @Transactional
     public DoctorAvailability addAvailability(DoctorAvailability availability) {
-        // 1. Validate if Doctor exists (This was missing in your code)
         if (availability.getDoctor() == null || availability.getDoctor().getId() == null) {
             throw new RuntimeException("Doctor ID is required to add a slot!");
         }
 
         User doctor = userRepository.findById(availability.getDoctor().getId())
-                .orElseThrow(() -> new RuntimeException("Doctor not found with ID: " + availability.getDoctor().getId()));
+                .orElseThrow(
+                        () -> new RuntimeException("Doctor not found with ID: " + availability.getDoctor().getId()));
 
-        // 2. Prevent past date slots
         if (availability.getAvailableDate().isBefore(LocalDate.now())) {
             throw new RuntimeException("Cannot add slots for past dates!");
         }
 
-        // 3. Prevent duplicate slots (Overlap check)
         boolean exists = availabilityRepository.existsByDoctor_IdAndAvailableDateAndStartTime(
                 doctor.getId(), availability.getAvailableDate(), availability.getStartTime());
-        
+
         if (exists) {
             throw new RuntimeException("This time slot already exists for the doctor!");
         }
 
-        // Set the full doctor object and save
         availability.setDoctor(doctor);
-        availability.setBooked(false); // New slots are always free
+        availability.setBooked(false);
         return availabilityRepository.save(availability);
     }
 
     @Override
     public List<DoctorAvailability> getAvailabilityByDoctorAndDate(Long doctorId, LocalDate date) {
-        // Only show slots that are NOT booked for the patient to see
-        return availabilityRepository.findByDoctor_IdAndAvailableDateAndIsBookedFalse(doctorId, date);
+        // FIXED: Repository-la namma mathina mari ingayum 'BookedFalse' nu mathiyachi
+        return availabilityRepository.findByDoctor_IdAndAvailableDateAndBookedFalse(doctorId, date);
     }
 
     @Override
     public List<DoctorAvailability> getUpcomingAvailabilityByDoctor(Long doctorId) {
-        // Doctor dashboard sorted by date
         return availabilityRepository.findByDoctor_IdOrderByAvailableDateDesc(doctorId);
     }
 

@@ -36,4 +36,5 @@ public class DoctorAvailability {
 
     @Column(nullable = false)
     private boolean booked = false;
+   
 }

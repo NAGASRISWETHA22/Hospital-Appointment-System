@@ -13,15 +13,12 @@ import java.util.Optional;
 @Repository
 public interface DoctorAvailabilityRepository extends JpaRepository<DoctorAvailability, Long> {
 
-    // For Doctor Dashboard
     List<DoctorAvailability> findByDoctor_IdOrderByAvailableDateDesc(Long doctorId);
 
-    // For Patient Booking (Hide booked slots)
-    List<DoctorAvailability> findByDoctor_IdAndAvailableDateAndIsBookedFalse(Long doctorId, LocalDate date);
+    // FIXED: Changed 'IsBookedFalse' to 'BookedFalse' to match the entity field name 'booked'
+    List<DoctorAvailability> findByDoctor_IdAndAvailableDateAndBookedFalse(Long doctorId, LocalDate date);
 
-    // Logic checks
     boolean existsByDoctor_IdAndAvailableDateAndStartTime(Long doctorId, LocalDate date, LocalTime startTime);
 
-    Optional<DoctorAvailability> findByDoctorAndAvailableDateAndStartTime(User doctor, LocalDate availableDate,
-            LocalTime startTime);
+    Optional<DoctorAvailability> findByDoctorAndAvailableDateAndStartTime(User doctor, LocalDate availableDate, LocalTime startTime);
 }
