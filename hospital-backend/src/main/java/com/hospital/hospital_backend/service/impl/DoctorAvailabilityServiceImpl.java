@@ -75,6 +75,7 @@ public class DoctorAvailabilityServiceImpl implements DoctorAvailabilityService 
         DoctorAvailability availability = availabilityRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Availability not found"));
         availability.setBooked(true);
+        availability.setBookedLegacy(true);
         availabilityRepository.save(availability);
     }
 

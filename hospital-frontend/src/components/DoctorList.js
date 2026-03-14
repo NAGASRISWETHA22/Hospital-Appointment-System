@@ -67,8 +67,8 @@ const DoctorList = () => {
     const handleDateSearch = async () => {
         setLoading(true);
         try {
-            // Updated endpoint to match standard availability search
-            const res = await API.get(`/api/availability/available-on?date=${searchDate}`);
+            // Fixed: API instances already have /api base, removed redundant /api prefix
+            const res = await API.get(`/availability/available-on?date=${searchDate}`);
             setDoctors(res.data || []);
         } catch (err) {
             console.error("Failed to fetch doctors by date:", err);
@@ -93,7 +93,8 @@ const DoctorList = () => {
         if (!date) return;
         setFetchingSlots(true);
         try {
-            const res = await API.get(`/api/availability/doctor/${doctorId}/date?date=${date}`);
+            // Fixed: API instance already have /api base
+            const res = await API.get(`/availability/doctor/${doctorId}/date?date=${date}`);
             // Logic Fix: Only show slots that are specifically marked as NOT booked
             setAvailableSlots(res.data.filter(s => !s.booked));
         } catch (err) {

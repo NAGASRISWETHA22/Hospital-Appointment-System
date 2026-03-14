@@ -47,9 +47,10 @@ public class AppointmentServiceImpl implements AppointmentService {
             throw new RuntimeException("Doctor is not available for the selected time slot!");
         }
 
-        // Mark slot as booked
+        // Mark slot as booked - Sync both columns
         DoctorAvailability slot = slotOpt.get();
         slot.setBooked(true);
+        slot.setBookedLegacy(true);
         availabilityRepository.save(slot);
 
         boolean isPatientBusy = appointmentRepository.existsByPatient_IdAndAppointmentDateAndStartTime(
@@ -98,6 +99,7 @@ public class AppointmentServiceImpl implements AppointmentService {
                     .findByDoctorAndAvailableDateAndStartTime(app.getDoctor(), app.getAppointmentDate(), app.getStartTime());
             slotOpt.ifPresent(slot -> {
                 slot.setBooked(false);
+                slot.setBookedLegacy(false);
                 availabilityRepository.save(slot);
             });
         }

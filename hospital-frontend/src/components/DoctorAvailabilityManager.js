@@ -75,37 +75,52 @@ const DoctorAvailabilityManager = () => {
                 <h3>Manage Availability Slots</h3>
             </div>
 
-            <form onSubmit={handleAddSlot} className="availability-form" style={{ marginBottom: '20px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                <div className="input-group">
-                    <label>Date:</label>
-                    <input 
-                        type="date" 
-                        required 
-                        min={new Date().toISOString().split('T')[0]}
-                        value={newSlot.availableDate}
-                        onChange={(e) => setNewSlot({...newSlot, availableDate: e.target.value})}
-                    />
+            <div className="slot-builder-premium">
+                <div className="sb-header">
+                    <h4>Add Rapid Availability Slot</h4>
+                    <p>Build your schedule one slot at a time</p>
                 </div>
-                <div className="input-group">
-                    <label>Start Time:</label>
-                    <input 
-                        type="time" 
-                        required 
-                        value={newSlot.startTime}
-                        onChange={(e) => setNewSlot({...newSlot, startTime: e.target.value})}
-                    />
-                </div>
-                <div className="input-group">
-                    <label>End Time:</label>
-                    <input 
-                        type="time" 
-                        required 
-                        value={newSlot.endTime}
-                        onChange={(e) => setNewSlot({...newSlot, endTime: e.target.value})}
-                    />
-                </div>
-                <button type="submit" className="add-btn" style={{ marginTop: '24px' }}>Add Slot</button>
-            </form>
+                <form onSubmit={handleAddSlot} className="sb-form-modern">
+                    <div className="sb-input-row">
+                        <div className="sb-field">
+                            <label>Date</label>
+                            <input 
+                                type="date" 
+                                className="premium-date"
+                                required 
+                                min={new Date().toISOString().split('T')[0]}
+                                value={newSlot.availableDate}
+                                onChange={(e) => setNewSlot({...newSlot, availableDate: e.target.value})}
+                            />
+                        </div>
+                        <div className="sb-field">
+                            <label>Start Time</label>
+                            <input 
+                                type="time" 
+                                className="premium-time-picker"
+                                required 
+                                value={newSlot.startTime}
+                                onChange={(e) => setNewSlot({...newSlot, startTime: e.target.value})}
+                            />
+                        </div>
+                        <div className="sb-field">
+                            <label>End Time</label>
+                            <input 
+                                type="time" 
+                                className="premium-time-picker"
+                                required 
+                                value={newSlot.endTime}
+                                onChange={(e) => setNewSlot({...newSlot, endTime: e.target.value})}
+                            />
+                        </div>
+                        <div className="sb-action">
+                            <button type="submit" className="add-slot-btn-vibrant">
+                                <span className="icon">＋</span> Add Slot
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
 
             <div className="availability-grid">
                 {slots.length > 0 ? (

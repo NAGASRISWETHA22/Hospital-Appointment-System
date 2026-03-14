@@ -604,6 +604,109 @@
     box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
 
+/* --- Slot Builder Premium (Manage Slots Section) --- */
+.slot-builder-premium {
+    background: white;
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+    border: 1px solid #f1f5f9;
+    margin-bottom: 40px;
+}
+
+.sb-header {
+    margin-bottom: 25px;
+}
+
+.sb-header h4 {
+    color: #0f172a;
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.sb-header p {
+    color: #64748b;
+    font-size: 0.9rem;
+    margin: 4px 0 0;
+}
+
+.sb-form-modern {
+    display: flex;
+    flex-direction: column;
+}
+
+.sb-input-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    align-items: flex-end;
+}
+
+.sb-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.sb-field label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
+
+.premium-date, .premium-time-picker {
+    padding: 12px 16px;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    color: #1e293b;
+    transition: all 0.2s;
+    background: #f8fafc;
+    width: 100%;
+}
+
+.premium-date:focus, .premium-time-picker:focus {
+    border-color: #3b82f6;
+    background: white;
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+.add-slot-btn-vibrant {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+    border: none;
+    padding: 14px 28px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2), 0 2px 4px -1px rgba(59, 130, 246, 0.1);
+}
+
+.add-slot-btn-vibrant:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.3), 0 4px 6px -2px rgba(59, 130, 246, 0.1);
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+}
+
+.add-slot-btn-vibrant:active {
+    transform: translateY(0);
+}
+
+.add-slot-btn-vibrant .icon {
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
 .row-actions {
     display: flex;
     gap: 16px;
