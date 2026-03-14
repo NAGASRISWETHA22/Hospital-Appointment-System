@@ -38,28 +38,30 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
 
                         // Availability Features
-                        // Doctors can POST/DELETE, Everyone (Doctor/Patient) can GET
-                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/availability/**").hasAuthority("ROLE_DOCTOR")
-                        .requestMatchers(org.springframework.http.HttpMethod.DELETE, "/api/availability/**").hasAuthority("ROLE_DOCTOR")
-                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/availability/**").authenticated()
+                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/availability/**")
+                        .hasRole("DOCTOR")
+                        .requestMatchers(org.springframework.http.HttpMethod.DELETE, "/api/availability/**")
+                        .hasRole("DOCTOR")
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/availability/**")
+                        .authenticated()
 
-                        // Appointment Features
-                        .requestMatchers("/api/appointments/book").hasAuthority("ROLE_PATIENT")
-                        .requestMatchers("/api/appointments/patient/**").hasAuthority("ROLE_PATIENT")
-                        .requestMatchers("/api/appointments/doctor/**").hasAuthority("ROLE_DOCTOR")
-                        .requestMatchers("/api/appointments/status/**").hasAnyAuthority("ROLE_DOCTOR", "ROLE_ADMIN", "ROLE_PATIENT")
-                        .requestMatchers("/api/appointments/all").hasAuthority("ROLE_ADMIN")
-                        .requestMatchers("/api/appointments/delete/**").hasAuthority("ROLE_ADMIN")
+                        // Appointment Features - Fixed 403 Forbidden
+                        .requestMatchers("/api/appointments/book").hasRole("PATIENT")
+                        .requestMatchers("/api/appointments/patient/**").hasRole("PATIENT")
+                        .requestMatchers("/api/appointments/doctor/**").hasRole("DOCTOR")
+                        .requestMatchers("/api/appointments/status/**").hasAnyRole("DOCTOR", "ADMIN", "PATIENT")
+                        .requestMatchers("/api/appointments/all").hasRole("ADMIN")
+                        .requestMatchers("/api/appointments/delete/**").hasRole("ADMIN")
 
                         // Review Features
-                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/reviews/**").hasAuthority("ROLE_PATIENT")
+                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/reviews/**").hasRole("PATIENT")
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/reviews/**").permitAll()
 
                         // Admin & Shared Features
                         .requestMatchers("/api/departments/**").permitAll()
-                        .requestMatchers("/api/analytics/**").hasAuthority("ROLE_ADMIN")
-                        .requestMatchers("/api/auth/register-doctor").hasAuthority("ROLE_ADMIN")
-                        .requestMatchers("/api/users/**").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers("/api/analytics/**").hasRole("ADMIN")
+                        .requestMatchers("/api/auth/register-doctor").hasRole("ADMIN")
+                        .requestMatchers("/api/users/**").hasRole("ADMIN")
 
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtFilter,
@@ -77,17 +79,20 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // Keep your existing Vercel patterns - they are perfect for deployment
-        configuration.setAllowedOriginPatterns(Arrays.asList(
+        // Exact Vercel URL adds more stability for CORS preflight
+        configuration.setAllowedOrigins(Arrays.asList(
                 "http://localhost:3000",
+                "https://hospital-appointment-system-theta.vercel.app",
+                "https://hospital-appointment-system-3yqai2l8u.vercel.app"));
+
+        // Pattern matching for branch previews
+        configuration.setAllowedOriginPatterns(Arrays.asList(
                 "https://hospital-appoint-*.vercel.app",
                 "https://hospital-appointment-system-*.vercel.app",
-                "https://*-nagasriswetha*.vercel.app",
-                "https://hospital-appointment-system-theta.vercel.app",
-                "https://hospital-appoint-git-9bb5ff-nagasriswethamurugan-5555s-projects.vercel.app"));
+                "https://*-nagasriswetha*.vercel.app"));
 
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH", "HEAD"));
-        configuration.setAllowedHeaders(Arrays.asList("*"));
+        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept", "X-Requested-With"));
         configuration.setExposedHeaders(Arrays.asList("Authorization", "Content-Type"));
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
