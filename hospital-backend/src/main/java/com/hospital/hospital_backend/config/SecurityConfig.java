@@ -36,32 +36,32 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/departments/**").permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/reviews/**").permitAll()
 
-                        // Availability Features
+                        // Availability Features - Replaced hasRole with hasAnyAuthority to fix prefix error
                         .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/availability/**")
-                        .hasRole("DOCTOR")
+                        .hasAnyAuthority("DOCTOR", "ROLE_DOCTOR")
                         .requestMatchers(org.springframework.http.HttpMethod.DELETE, "/api/availability/**")
-                        .hasRole("DOCTOR")
+                        .hasAnyAuthority("DOCTOR", "ROLE_DOCTOR")
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/availability/**")
                         .authenticated()
 
                         // Appointment Features - Fixed 403 Forbidden
-                        .requestMatchers("/api/appointments/book").hasAnyAuthority("PATIENT","ROLE_PATIENT")
-                        .requestMatchers("/api/appointments/patient/**").hasAnyAuthority("PATIENT","ROLE_PATIENT")
-                        .requestMatchers("/api/appointments/doctor/**").hasAnyAuthority("DOCTOR","ROLE_DOCTOR")
-                        .requestMatchers("/api/appointments/status/**").hasAnyRole("DOCTOR", "ADMIN", "PATIENT","ROLE_DOCTOR", "ROLE_ADMIN", "ROLE_PATIENT")
-                        .requestMatchers("/api/appointments/all").hasAnyAuthority("ADMIN","ROLE_ADMIN")
-                        .requestMatchers("/api/appointments/delete/**").hasAnyAuthority("ADMIN","ROLE_ADMIN")
+                        .requestMatchers("/api/appointments/book").hasAnyAuthority("PATIENT", "ROLE_PATIENT")
+                        .requestMatchers("/api/appointments/patient/**").hasAnyAuthority("PATIENT", "ROLE_PATIENT")
+                        .requestMatchers("/api/appointments/doctor/**").hasAnyAuthority("DOCTOR", "ROLE_DOCTOR")
+                        .requestMatchers("/api/appointments/status/**").hasAnyAuthority("DOCTOR", "ADMIN", "PATIENT", "ROLE_DOCTOR", "ROLE_ADMIN", "ROLE_PATIENT")
+                        .requestMatchers("/api/appointments/all").hasAnyAuthority("ADMIN", "ROLE_ADMIN")
+                        .requestMatchers("/api/appointments/delete/**").hasAnyAuthority("ADMIN", "ROLE_ADMIN")
 
                         // Review Features
-                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/reviews/**").hasRole("PATIENT")
-                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/reviews/**").permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/reviews/**").hasAnyAuthority("PATIENT", "ROLE_PATIENT")
 
                         // Admin & Shared Features
-                        .requestMatchers("/api/departments/**").permitAll()
-                        .requestMatchers("/api/analytics/**").hasRole("ADMIN")
-                        .requestMatchers("/api/auth/register-doctor").hasRole("ADMIN")
-                        .requestMatchers("/api/users/**").hasRole("ADMIN")
+                        .requestMatchers("/api/analytics/**").hasAnyAuthority("ADMIN", "ROLE_ADMIN")
+                        .requestMatchers("/api/auth/register-doctor").hasAnyAuthority("ADMIN", "ROLE_ADMIN")
+                        .requestMatchers("/api/users/**").hasAnyAuthority("ADMIN", "ROLE_ADMIN")
 
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtFilter,
@@ -79,13 +79,11 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // Exact Vercel URL adds more stability for CORS preflight
         configuration.setAllowedOrigins(Arrays.asList(
                 "http://localhost:3000",
                 "https://hospital-appointment-system-theta.vercel.app",
                 "https://hospital-appointment-system-3yqai2l8u.vercel.app"));
 
-        // Pattern matching for branch previews
         configuration.setAllowedOriginPatterns(Arrays.asList(
                 "https://hospital-appoint-*.vercel.app",
                 "https://hospital-appointment-system-*.vercel.app",
