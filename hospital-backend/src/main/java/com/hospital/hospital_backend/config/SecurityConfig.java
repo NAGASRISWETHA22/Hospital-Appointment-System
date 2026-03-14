@@ -37,30 +37,29 @@ public class SecurityConfig {
                         .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
 
-                        // Availability Features (Crucial Fix)
-                        // Doctors can POST/DELETE, Everyone can GET
-                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/availability/**")
-                        .hasRole("DOCTOR")
-                        .requestMatchers(org.springframework.http.HttpMethod.DELETE, "/api/availability/**")
-                        .hasRole("DOCTOR")
-                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/availability/**")
-                        .authenticated()
+                        // Availability Features
+                        // Doctors can POST/DELETE, Everyone (Doctor/Patient) can GET
+                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/availability/**").hasAuthority("ROLE_DOCTOR")
+                        .requestMatchers(org.springframework.http.HttpMethod.DELETE, "/api/availability/**").hasAuthority("ROLE_DOCTOR")
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/availability/**").authenticated()
 
-                        // Patient Features
-                        .requestMatchers("/api/appointments/book").hasRole("PATIENT")
-                        .requestMatchers("/api/appointments/patient/**").hasRole("PATIENT")
-                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/reviews/**").hasRole("PATIENT")
+                        // Appointment Features
+                        .requestMatchers("/api/appointments/book").hasAuthority("ROLE_PATIENT")
+                        .requestMatchers("/api/appointments/patient/**").hasAuthority("ROLE_PATIENT")
+                        .requestMatchers("/api/appointments/doctor/**").hasAuthority("ROLE_DOCTOR")
+                        .requestMatchers("/api/appointments/status/**").hasAnyAuthority("ROLE_DOCTOR", "ROLE_ADMIN", "ROLE_PATIENT")
+                        .requestMatchers("/api/appointments/all").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers("/api/appointments/delete/**").hasAuthority("ROLE_ADMIN")
+
+                        // Review Features
+                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/reviews/**").hasAuthority("ROLE_PATIENT")
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/reviews/**").permitAll()
 
-                        // Doctor Features
-                        .requestMatchers("/api/appointments/doctor/**").hasRole("DOCTOR")
-                        .requestMatchers("/api/appointments/*/status").hasAnyRole("DOCTOR", "ADMIN")
-
-                        // Shared & Admin Features
-                        .requestMatchers("/api/departments/**").permitAll() // Let anyone see departments
-                        .requestMatchers("/api/analytics/**").hasRole("ADMIN")
-                        .requestMatchers("/api/auth/register-doctor").hasRole("ADMIN")
-                        .requestMatchers("/api/users/**").hasRole("ADMIN")
+                        // Admin & Shared Features
+                        .requestMatchers("/api/departments/**").permitAll()
+                        .requestMatchers("/api/analytics/**").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers("/api/auth/register-doctor").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers("/api/users/**").hasAuthority("ROLE_ADMIN")
 
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtFilter,
