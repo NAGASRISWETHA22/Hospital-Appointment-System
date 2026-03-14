@@ -32,11 +32,12 @@ public class DoctorAvailability {
     @Column(nullable = false)
     private LocalTime endTime;
 
-    // CRITICAL FIX: The DB has BOTH 'is_booked' and 'booked' columns.
-    // Previously mapped to 'is_booked', but MySQL rejected inserts because
-    // the orphaned 'booked' column had no DEFAULT.
-    // Now mapping to 'booked' directly. ddl-auto=update will add DEFAULT 0.
+    // The DB schema currently has BOTH 'booked' and 'is_booked' columns, and neither has a DB default.
+    // To prevent MySQL from rejecting inserts, we map both and ensure both are populated.
     @Column(name = "booked", nullable = false, columnDefinition = "TINYINT(1) DEFAULT 0")
     private boolean booked = false;
 
+    // Renamed to 'bookedLegacy' to avoid Lombok generating duplicate 'setBooked' and 'isBooked' methods!
+    @Column(name = "is_booked", nullable = false, columnDefinition = "TINYINT(1) DEFAULT 0")
+    private boolean bookedLegacy = false;
 }

@@ -48,6 +48,7 @@ public class DoctorAvailabilityServiceImpl implements DoctorAvailabilityService 
         availability.setStartTime(request.getStartTime());
         availability.setEndTime(request.getEndTime());
         availability.setBooked(false);
+        availability.setBookedLegacy(false);
 
         return availabilityRepository.save(availability);
     }
