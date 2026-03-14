@@ -32,9 +32,11 @@ public class DoctorAvailability {
     @Column(nullable = false)
     private LocalTime endTime;
 
-    // columnDefinition ensures MySQL always has a server-side DEFAULT 0 so
-    // INSERT statements that omit this column never throw "doesn't have a default value"
-    @Column(name = "is_booked", nullable = false, columnDefinition = "TINYINT(1) DEFAULT 0")
+    // CRITICAL FIX: The DB has BOTH 'is_booked' and 'booked' columns.
+    // Previously mapped to 'is_booked', but MySQL rejected inserts because
+    // the orphaned 'booked' column had no DEFAULT.
+    // Now mapping to 'booked' directly. ddl-auto=update will add DEFAULT 0.
+    @Column(name = "booked", nullable = false, columnDefinition = "TINYINT(1) DEFAULT 0")
     private boolean booked = false;
 
 }
