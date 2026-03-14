@@ -627,3 +627,27 @@
 .reviewer-name { font-weight: 600; color: #1e293b; }
 .stars { color: #fbbf24; font-size: 16px; }
 .review-text { margin: 0; color: #475569; font-size: 14px; line-height: 1.5; }
+
+/* --- Reviewed badge (shown after patient submits a review) --- */
+.reviewed-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 14px;
+    background: #dcfce7;
+    color: #15803d;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+/* Empty state helpers */
+.empty-slots, .empty-reviews {
+    padding: 16px;
+    color: #94a3b8;
+    font-size: 14px;
+    text-align: center;
+    background: #f8fafc;
+    border-radius: 10px;
+    border: 1px dashed #e2e8f0;
+}

@@ -39,18 +39,17 @@ const DoctorAvailabilityManager = () => {
         }
 
         try {
+            // Send flat DTO matching DoctorAvailabilityRequest.java
             await API.post('/availability', {
-                doctor: { id: user.id }, // Matches backend expectations
+                doctorId: user.id,
                 availableDate: newSlot.availableDate,
-                startTime: newSlot.startTime + ":00", // Format for LocalTime
-                endTime: newSlot.endTime + ":00",
-                booked: false
+                startTime: newSlot.startTime + ":00",
+                endTime: newSlot.endTime + ":00"
             });
             alert('Slot added successfully!');
             setNewSlot({ availableDate: '', startTime: '', endTime: '' });
             fetchSlots();
         } catch (err) {
-            // Display specific error message from backend if available
             const errorMsg = err.response?.data || 'Failed to add slot';
             alert(errorMsg);
         }

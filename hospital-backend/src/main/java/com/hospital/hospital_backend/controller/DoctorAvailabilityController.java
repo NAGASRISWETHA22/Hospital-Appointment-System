@@ -1,6 +1,8 @@
 package com.hospital.hospital_backend.controller;
 
+import com.hospital.hospital_backend.dto.DoctorAvailabilityRequest;
 import com.hospital.hospital_backend.entity.DoctorAvailability;
+import com.hospital.hospital_backend.entity.User;
 import com.hospital.hospital_backend.service.DoctorAvailabilityService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -13,15 +15,15 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/availability")
 @RequiredArgsConstructor
-//@CrossOrigin(origins = "*") // Allows local development with different ports
+//@CrossOrigin(origins = "*")
 public class DoctorAvailabilityController {
 
     private final DoctorAvailabilityService availabilityService;
 
     @PostMapping
-    public ResponseEntity<?> addAvailability(@RequestBody DoctorAvailability availability) {
+    public ResponseEntity<?> addAvailability(@RequestBody DoctorAvailabilityRequest request) {
         try {
-            return ResponseEntity.ok(availabilityService.addAvailability(availability));
+            return ResponseEntity.ok(availabilityService.addAvailability(request));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -37,6 +39,13 @@ public class DoctorAvailabilityController {
             @PathVariable Long doctorId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         return ResponseEntity.ok(availabilityService.getAvailabilityByDoctorAndDate(doctorId, date));
+    }
+
+    // Returns distinct doctors who have at least one unbooked slot on the given date
+    @GetMapping("/available-on")
+    public ResponseEntity<List<User>> getDoctorsAvailableOnDate(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        return ResponseEntity.ok(availabilityService.getDoctorsAvailableOnDate(date));
     }
 
     @DeleteMapping("/{id}")

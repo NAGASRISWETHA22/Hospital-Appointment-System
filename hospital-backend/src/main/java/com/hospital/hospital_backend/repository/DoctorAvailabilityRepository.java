@@ -15,10 +15,12 @@ public interface DoctorAvailabilityRepository extends JpaRepository<DoctorAvaila
 
     List<DoctorAvailability> findByDoctor_IdOrderByAvailableDateDesc(Long doctorId);
 
-    // FIXED: Changed 'IsBookedFalse' to 'BookedFalse' to match the entity field name 'booked'
     List<DoctorAvailability> findByDoctor_IdAndAvailableDateAndBookedFalse(Long doctorId, LocalDate date);
 
     boolean existsByDoctor_IdAndAvailableDateAndStartTime(Long doctorId, LocalDate date, LocalTime startTime);
 
     Optional<DoctorAvailability> findByDoctorAndAvailableDateAndStartTime(User doctor, LocalDate availableDate, LocalTime startTime);
+
+    // Used to find all doctors who have free slots on a given date
+    List<DoctorAvailability> findByAvailableDateAndBookedFalse(LocalDate date);
 }

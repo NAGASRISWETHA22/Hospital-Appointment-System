@@ -1,7 +1,6 @@
 package com.hospital.hospital_backend.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -13,7 +12,6 @@ import java.time.LocalTime;
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
 @Table(name = "doctor_availability")
 @com.fasterxml.jackson.annotation.JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class DoctorAvailability {
@@ -34,7 +32,9 @@ public class DoctorAvailability {
     @Column(nullable = false)
     private LocalTime endTime;
 
-    @Column(name = "is_booked", nullable = false)
+    // columnDefinition ensures MySQL always has a server-side DEFAULT 0 so
+    // INSERT statements that omit this column never throw "doesn't have a default value"
+    @Column(name = "is_booked", nullable = false, columnDefinition = "TINYINT(1) DEFAULT 0")
     private boolean booked = false;
 
 }

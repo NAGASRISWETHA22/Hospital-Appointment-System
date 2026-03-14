@@ -1,5 +1,6 @@
 package com.hospital.hospital_backend.service.impl;
 
+import com.hospital.hospital_backend.dto.DoctorAvailabilityRequest;
 import com.hospital.hospital_backend.entity.DoctorAvailability;
 import com.hospital.hospital_backend.entity.User;
 import com.hospital.hospital_backend.repository.DoctorAvailabilityRepository;
@@ -11,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -21,34 +23,37 @@ public class DoctorAvailabilityServiceImpl implements DoctorAvailabilityService 
 
     @Override
     @Transactional
-    public DoctorAvailability addAvailability(DoctorAvailability availability) {
-        if (availability.getDoctor() == null || availability.getDoctor().getId() == null) {
+    public DoctorAvailability addAvailability(DoctorAvailabilityRequest request) {
+        if (request.getDoctorId() == null) {
             throw new RuntimeException("Doctor ID is required to add a slot!");
         }
 
-        User doctor = userRepository.findById(availability.getDoctor().getId())
-                .orElseThrow(
-                        () -> new RuntimeException("Doctor not found with ID: " + availability.getDoctor().getId()));
+        User doctor = userRepository.findById(request.getDoctorId())
+                .orElseThrow(() -> new RuntimeException("Doctor not found with ID: " + request.getDoctorId()));
 
-        if (availability.getAvailableDate().isBefore(LocalDate.now())) {
+        if (request.getAvailableDate().isBefore(LocalDate.now())) {
             throw new RuntimeException("Cannot add slots for past dates!");
         }
 
         boolean exists = availabilityRepository.existsByDoctor_IdAndAvailableDateAndStartTime(
-                doctor.getId(), availability.getAvailableDate(), availability.getStartTime());
+                doctor.getId(), request.getAvailableDate(), request.getStartTime());
 
         if (exists) {
             throw new RuntimeException("This time slot already exists for the doctor!");
         }
 
+        DoctorAvailability availability = new DoctorAvailability();
         availability.setDoctor(doctor);
+        availability.setAvailableDate(request.getAvailableDate());
+        availability.setStartTime(request.getStartTime());
+        availability.setEndTime(request.getEndTime());
         availability.setBooked(false);
+
         return availabilityRepository.save(availability);
     }
 
     @Override
     public List<DoctorAvailability> getAvailabilityByDoctorAndDate(Long doctorId, LocalDate date) {
-        // FIXED: Repository-la namma mathina mari ingayum 'BookedFalse' nu mathiyachi
         return availabilityRepository.findByDoctor_IdAndAvailableDateAndBookedFalse(doctorId, date);
     }
 
@@ -70,5 +75,15 @@ public class DoctorAvailabilityServiceImpl implements DoctorAvailabilityService 
                 .orElseThrow(() -> new RuntimeException("Availability not found"));
         availability.setBooked(true);
         availabilityRepository.save(availability);
+    }
+
+    @Override
+    public List<User> getDoctorsAvailableOnDate(LocalDate date) {
+        // Get all unbooked slots on the given date, then extract distinct doctors
+        List<DoctorAvailability> slots = availabilityRepository.findByAvailableDateAndBookedFalse(date);
+        return slots.stream()
+                .map(DoctorAvailability::getDoctor)
+                .distinct()
+                .collect(Collectors.toList());
     }
 }

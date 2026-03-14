@@ -1,5 +1,6 @@
 package com.hospital.hospital_backend.controller;
 
+import com.hospital.hospital_backend.dto.ReviewRequest;
 import com.hospital.hospital_backend.entity.Review;
 import com.hospital.hospital_backend.service.ReviewService;
 import lombok.RequiredArgsConstructor;
@@ -17,8 +18,8 @@ public class ReviewController {
     private final ReviewService reviewService;
 
     @PostMapping
-    public ResponseEntity<Review> addReview(@RequestBody Review review) {
-        return ResponseEntity.ok(reviewService.addReview(review));
+    public ResponseEntity<Review> addReview(@RequestBody ReviewRequest request) {
+        return ResponseEntity.ok(reviewService.addReview(request));
     }
 
     @GetMapping("/doctor/{doctorId}")
