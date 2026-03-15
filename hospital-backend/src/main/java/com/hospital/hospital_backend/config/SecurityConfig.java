@@ -36,6 +36,8 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .httpBasic(basic -> basic.disable())
+                .formLogin(form -> form.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
@@ -43,27 +45,26 @@ public class SecurityConfig {
                         .requestMatchers("/api/departments/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/reviews/**").permitAll()
 
-                        // Appointment Features (Highest precedence for restricted access)
-                        .requestMatchers("/api/appointments/book").hasRole("PATIENT")
-                        .requestMatchers("/api/appointments/patient/**").hasRole("PATIENT")
-                        .requestMatchers("/api/appointments/doctor/**").hasRole("DOCTOR")
-                        .requestMatchers("/api/appointments/status/**").hasAnyRole("DOCTOR", "ADMIN", "PATIENT")
-                        .requestMatchers("/api/appointments/all").hasRole("ADMIN")
-                        .requestMatchers("/api/appointments/all").hasRole("ADMIN")
-                        .requestMatchers("/api/appointments/delete/**").hasRole("ADMIN")
+                        // Appointment Features
+                        .requestMatchers("/api/appointments/book").hasAnyAuthority("PATIENT", "ROLE_PATIENT")
+                        .requestMatchers("/api/appointments/patient/**").hasAnyAuthority("PATIENT", "ROLE_PATIENT")
+                        .requestMatchers("/api/appointments/doctor/**").hasAnyAuthority("DOCTOR", "ROLE_DOCTOR")
+                        .requestMatchers("/api/appointments/status/**").hasAnyAuthority("PATIENT", "ROLE_PATIENT", "DOCTOR", "ROLE_DOCTOR", "ADMIN", "ROLE_ADMIN")
+                        .requestMatchers("/api/appointments/all").hasAnyAuthority("ADMIN", "ROLE_ADMIN")
+                        .requestMatchers("/api/appointments/delete/**").hasAnyAuthority("ADMIN", "ROLE_ADMIN")
 
                         // Availability Features
-                        .requestMatchers(HttpMethod.POST, "/api/availability/**").hasRole("DOCTOR")
-                        .requestMatchers(HttpMethod.DELETE, "/api/availability/**").hasRole("DOCTOR")
+                        .requestMatchers(HttpMethod.POST, "/api/availability/**").hasAnyAuthority("DOCTOR", "ROLE_DOCTOR")
+                        .requestMatchers(HttpMethod.DELETE, "/api/availability/**").hasAnyAuthority("DOCTOR", "ROLE_DOCTOR")
                         .requestMatchers(HttpMethod.GET, "/api/availability/**").authenticated()
 
                         // Review Features
-                        .requestMatchers(HttpMethod.POST, "/api/reviews/**").hasRole("PATIENT")
+                        .requestMatchers(HttpMethod.POST, "/api/reviews/**").hasAnyAuthority("PATIENT", "ROLE_PATIENT")
 
                         // Admin & Shared Features
-                        .requestMatchers("/api/analytics/**").hasRole("ADMIN")
-                        .requestMatchers("/api/auth/register-doctor").hasRole("ADMIN")
-                        .requestMatchers("/api/users/**").hasRole("ADMIN")
+                        .requestMatchers("/api/analytics/**").hasAnyAuthority("ADMIN", "ROLE_ADMIN")
+                        .requestMatchers("/api/auth/register-doctor").hasAnyAuthority("ADMIN", "ROLE_ADMIN")
+                        .requestMatchers("/api/users/**").hasAnyAuthority("ADMIN", "ROLE_ADMIN")
 
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
