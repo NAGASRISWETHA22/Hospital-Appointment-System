@@ -3,11 +3,13 @@ package com.hospital.hospital_backend.service.impl;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.hospital.hospital_backend.dto.AppointmentRequest;
+import com.hospital.hospital_backend.dto.request.AppointmentRequest;
+import com.hospital.hospital_backend.dto.response.AppointmentResponse;
 import com.hospital.hospital_backend.entity.Appointment;
 import com.hospital.hospital_backend.entity.DoctorAvailability;
 import com.hospital.hospital_backend.entity.User;
@@ -26,6 +28,21 @@ public class AppointmentServiceImpl implements AppointmentService {
     private final AppointmentRepository appointmentRepository;
     private final UserRepository userRepository;
     private final DoctorAvailabilityRepository availabilityRepository;
+
+    public AppointmentResponse convertToResponse(Appointment appointment) {
+        if (appointment == null) return null;
+        return AppointmentResponse.builder()
+                .id(appointment.getId())
+                .patientId(appointment.getPatient().getId())
+                .patientName(appointment.getPatient().getName())
+                .doctorId(appointment.getDoctor().getId())
+                .doctorName(appointment.getDoctor().getName())
+                .appointmentDate(appointment.getAppointmentDate())
+                .startTime(appointment.getStartTime())
+                .endTime(appointment.getEndTime())
+                .status(appointment.getStatus())
+                .build();
+    }
 
     @Override
     @Transactional

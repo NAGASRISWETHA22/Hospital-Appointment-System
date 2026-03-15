@@ -2,7 +2,7 @@ package com.hospital.hospital_backend.service;
 
 import java.util.List;
 
-import com.hospital.hospital_backend.dto.AppointmentRequest;
+import com.hospital.hospital_backend.dto.request.AppointmentRequest;
 import com.hospital.hospital_backend.entity.Appointment;
 import com.hospital.hospital_backend.enums.AppointmentStatus;
 public interface AppointmentService {

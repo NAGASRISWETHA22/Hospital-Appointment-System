@@ -1,6 +1,7 @@
 package com.hospital.hospital_backend.service.impl;
 
-import com.hospital.hospital_backend.dto.DoctorAvailabilityRequest;
+import com.hospital.hospital_backend.dto.request.DoctorAvailabilityRequest;
+import com.hospital.hospital_backend.dto.response.DoctorAvailabilityResponse;
 import com.hospital.hospital_backend.entity.DoctorAvailability;
 import com.hospital.hospital_backend.entity.User;
 import com.hospital.hospital_backend.repository.DoctorAvailabilityRepository;
@@ -20,6 +21,19 @@ public class DoctorAvailabilityServiceImpl implements DoctorAvailabilityService 
 
     private final DoctorAvailabilityRepository availabilityRepository;
     private final UserRepository userRepository;
+
+    public DoctorAvailabilityResponse convertToResponse(DoctorAvailability availability) {
+        if (availability == null) return null;
+        return DoctorAvailabilityResponse.builder()
+                .id(availability.getId())
+                .doctorId(availability.getDoctor().getId())
+                .doctorName(availability.getDoctor().getName())
+                .availableDate(availability.getAvailableDate())
+                .startTime(availability.getStartTime())
+                .endTime(availability.getEndTime())
+                .booked(availability.isBooked())
+                .build();
+    }
 
     @Override
     @Transactional

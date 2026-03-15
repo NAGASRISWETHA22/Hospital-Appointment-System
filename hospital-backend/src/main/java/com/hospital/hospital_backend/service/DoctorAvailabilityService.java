@@ -1,6 +1,6 @@
 package com.hospital.hospital_backend.service;
 
-import com.hospital.hospital_backend.dto.DoctorAvailabilityRequest;
+import com.hospital.hospital_backend.dto.request.DoctorAvailabilityRequest;
 import com.hospital.hospital_backend.entity.DoctorAvailability;
 import com.hospital.hospital_backend.entity.User;
 

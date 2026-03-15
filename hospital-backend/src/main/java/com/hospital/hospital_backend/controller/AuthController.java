@@ -1,6 +1,7 @@
 package com.hospital.hospital_backend.controller;
 
-import com.hospital.hospital_backend.dto.LoginRequest;
+import com.hospital.hospital_backend.dto.request.LoginRequest;
+import com.hospital.hospital_backend.dto.response.UserResponse;
 import com.hospital.hospital_backend.entity.User;
 import com.hospital.hospital_backend.enums.Role;
 import com.hospital.hospital_backend.repository.UserRepository;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -37,7 +39,7 @@ public class AuthController {
             // Only allow Patient registration from this public endpoint
             user.setRole(Role.PATIENT);
             User registered = userService.register(user);
-            return ResponseEntity.ok(registered);
+            return ResponseEntity.ok(userService.convertToResponse(registered));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
@@ -49,7 +51,7 @@ public class AuthController {
             // Admin only endpoint (checked by SecurityConfig)
             user.setRole(Role.DOCTOR);
             User registered = userService.register(user);
-            return ResponseEntity.ok(registered);
+            return ResponseEntity.ok(userService.convertToResponse(registered));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
@@ -66,12 +68,13 @@ public class AuthController {
 
             String token = jwtService.generateToken(userDetails.getUsername());
             User user = userDetails.getUser();
+            UserResponse userResponse = userService.convertToResponse(user);
 
             return ResponseEntity.ok(Map.of(
-                    "id", user.getId(),
-                    "name", user.getName(),
-                    "email", user.getEmail(),
-                    "role", user.getRole(),
+                    "id", userResponse.getId(),
+                    "name", userResponse.getName(),
+                    "email", userResponse.getEmail(),
+                    "role", userResponse.getRole(),
                     "token", token));
         } catch (Exception e) {
             return ResponseEntity.status(401).body("Invalid email or password");
@@ -79,8 +82,11 @@ public class AuthController {
     }
 
     @GetMapping("/doctors")
-    public ResponseEntity<List<User>> getDoctors() {
-        return ResponseEntity.ok(userRepository.findByRole(Role.DOCTOR));
+    public ResponseEntity<List<UserResponse>> getDoctors() {
+        List<UserResponse> doctors = userRepository.findByRole(Role.DOCTOR).stream()
+                .map(userService::convertToResponse)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(doctors);
     }
 
     @DeleteMapping("/delete/{id}")

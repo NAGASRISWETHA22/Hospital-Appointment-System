@@ -1,4 +1,4 @@
-package com.hospital.hospital_backend.dto;
+package com.hospital.hospital_backend.dto.request;
 
 import lombok.Data;
 

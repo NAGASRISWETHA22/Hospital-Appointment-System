@@ -1,13 +1,16 @@
 package com.hospital.hospital_backend.controller;
 
-import com.hospital.hospital_backend.dto.ReviewRequest;
+import com.hospital.hospital_backend.dto.request.ReviewRequest;
+import com.hospital.hospital_backend.dto.response.ReviewResponse;
 import com.hospital.hospital_backend.entity.Review;
 import com.hospital.hospital_backend.service.ReviewService;
+import com.hospital.hospital_backend.service.impl.ReviewServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/reviews")
@@ -16,15 +19,20 @@ import java.util.List;
 public class ReviewController {
 
     private final ReviewService reviewService;
+    private final ReviewServiceImpl reviewServiceImpl;
 
     @PostMapping
-    public ResponseEntity<Review> addReview(@RequestBody ReviewRequest request) {
-        return ResponseEntity.ok(reviewService.addReview(request));
+    public ResponseEntity<ReviewResponse> addReview(@RequestBody ReviewRequest request) {
+        Review review = reviewService.addReview(request);
+        return ResponseEntity.ok(reviewServiceImpl.convertToResponse(review));
     }
 
     @GetMapping("/doctor/{doctorId}")
-    public ResponseEntity<List<Review>> getReviewsByDoctor(@PathVariable Long doctorId) {
-        return ResponseEntity.ok(reviewService.getReviewsByDoctor(doctorId));
+    public ResponseEntity<List<ReviewResponse>> getReviewsByDoctor(@PathVariable Long doctorId) {
+        List<ReviewResponse> reviews = reviewService.getReviewsByDoctor(doctorId).stream()
+                .map(reviewServiceImpl::convertToResponse)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(reviews);
     }
 
     @DeleteMapping("/{id}")

@@ -15,6 +15,9 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import lombok.RequiredArgsConstructor;
 
 import java.util.Arrays;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.http.HttpMethod;
 
 @Configuration
 @EnableWebSecurity
@@ -33,12 +36,12 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .sessionManagement(session -> session.sessionCreationPolicy(org.springframework.security.config.http.SessionCreationPolicy.STATELESS))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/departments/**").permitAll()
-                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/reviews/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/reviews/**").permitAll()
 
                         // Appointment Features (Highest precedence for restricted access)
                         .requestMatchers("/api/appointments/book").hasRole("PATIENT")
@@ -46,15 +49,16 @@ public class SecurityConfig {
                         .requestMatchers("/api/appointments/doctor/**").hasRole("DOCTOR")
                         .requestMatchers("/api/appointments/status/**").hasAnyRole("DOCTOR", "ADMIN", "PATIENT")
                         .requestMatchers("/api/appointments/all").hasRole("ADMIN")
+                        .requestMatchers("/api/appointments/all").hasRole("ADMIN")
                         .requestMatchers("/api/appointments/delete/**").hasRole("ADMIN")
 
                         // Availability Features
-                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/availability/**").hasRole("DOCTOR")
-                        .requestMatchers(org.springframework.http.HttpMethod.DELETE, "/api/availability/**").hasRole("DOCTOR")
-                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/availability/**").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/availability/**").hasRole("DOCTOR")
+                        .requestMatchers(HttpMethod.DELETE, "/api/availability/**").hasRole("DOCTOR")
+                        .requestMatchers(HttpMethod.GET, "/api/availability/**").authenticated()
 
                         // Review Features
-                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/reviews/**").hasRole("PATIENT")
+                        .requestMatchers(HttpMethod.POST, "/api/reviews/**").hasRole("PATIENT")
 
                         // Admin & Shared Features
                         .requestMatchers("/api/analytics/**").hasRole("ADMIN")
@@ -62,8 +66,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/users/**").hasRole("ADMIN")
 
                         .anyRequest().authenticated())
-                .addFilterBefore(jwtFilter,
-                        org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

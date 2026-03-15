@@ -1,4 +1,4 @@
-package com.hospital.hospital_backend.dto;
+package com.hospital.hospital_backend.dto.request;
 
 import java.time.LocalDate;
 import java.time.LocalTime;

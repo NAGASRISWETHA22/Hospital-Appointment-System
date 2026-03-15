@@ -1,9 +1,11 @@
 package com.hospital.hospital_backend.controller;
 
-import com.hospital.hospital_backend.dto.DoctorAvailabilityRequest;
+import com.hospital.hospital_backend.dto.request.DoctorAvailabilityRequest;
+import com.hospital.hospital_backend.dto.response.DoctorAvailabilityResponse;
 import com.hospital.hospital_backend.entity.DoctorAvailability;
 import com.hospital.hospital_backend.entity.User;
 import com.hospital.hospital_backend.service.DoctorAvailabilityService;
+import com.hospital.hospital_backend.service.impl.DoctorAvailabilityServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/availability")
@@ -19,19 +22,24 @@ import java.util.List;
 public class DoctorAvailabilityController {
 
     private final DoctorAvailabilityService availabilityService;
+    private final DoctorAvailabilityServiceImpl availabilityServiceImpl;
 
     @PostMapping
     public ResponseEntity<?> addAvailability(@RequestBody DoctorAvailabilityRequest request) {
         try {
-            return ResponseEntity.ok(availabilityService.addAvailability(request));
+            DoctorAvailability availability = availabilityService.addAvailability(request);
+            return ResponseEntity.ok(availabilityServiceImpl.convertToResponse(availability));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
     @GetMapping("/doctor/{doctorId}")
-    public ResponseEntity<List<DoctorAvailability>> getUpcomingAvailability(@PathVariable Long doctorId) {
-        return ResponseEntity.ok(availabilityService.getUpcomingAvailabilityByDoctor(doctorId));
+    public ResponseEntity<List<DoctorAvailabilityResponse>> getUpcomingAvailability(@PathVariable Long doctorId) {
+        List<DoctorAvailabilityResponse> responses = availabilityService.getUpcomingAvailabilityByDoctor(doctorId).stream()
+                .map(availabilityServiceImpl::convertToResponse)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(responses);
     }
 
     @GetMapping("/doctor/{doctorId}/date")

@@ -1,11 +1,13 @@
 package com.hospital.hospital_backend.service.impl;
 
+import com.hospital.hospital_backend.dto.response.UserResponse;
 import com.hospital.hospital_backend.entity.User;
 import com.hospital.hospital_backend.repository.UserRepository;
 import com.hospital.hospital_backend.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import java.util.Optional;
 import java.util.Optional;
 
 @Service
@@ -14,6 +16,19 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+
+    public UserResponse convertToResponse(User user) {
+        if (user == null) return null;
+        return UserResponse.builder()
+                .id(user.getId())
+                .name(user.getName())
+                .email(user.getEmail())
+                .role(user.getRole())
+                .specialization(user.getSpecialization())
+                .departmentId(user.getDepartment() != null ? user.getDepartment().getId() : null)
+                .departmentName(user.getDepartment() != null ? user.getDepartment().getName() : null)
+                .build();
+    }
 
     @Override
     public User register(User user) {
