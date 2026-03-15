@@ -126,7 +126,15 @@ const DoctorList = () => {
             setSelectedDoctor(null); 
             setBookingData({ date: '', slot: null });
         } catch (err) {
-            alert("Booking failed: " + (err.response?.data || err.message));
+            const status = err.response?.status;
+            const role = user?.role;
+            const msg = err.response?.data || err.message;
+            
+            if (status === 403) {
+                alert(`Booking Forbidden (403): Your account role is "${role}". Only Patients can book.\nIf this is correct, please try logging out and back in.`);
+            } else {
+                alert("Booking failed: " + msg);
+            }
         }
     };
 

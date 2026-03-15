@@ -33,35 +33,33 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .sessionManagement(session -> session.sessionCreationPolicy(org.springframework.security.config.http.SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/departments/**").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/reviews/**").permitAll()
 
-                        // Availability Features - Replaced hasRole with hasAnyAuthority to fix prefix error
-                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/availability/**")
-                        .hasAnyAuthority("DOCTOR", "ROLE_DOCTOR")
-                        .requestMatchers(org.springframework.http.HttpMethod.DELETE, "/api/availability/**")
-                        .hasAnyAuthority("DOCTOR", "ROLE_DOCTOR")
-                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/availability/**")
-                        .authenticated()
+                        // Appointment Features (Highest precedence for restricted access)
+                        .requestMatchers("/api/appointments/book").hasRole("PATIENT")
+                        .requestMatchers("/api/appointments/patient/**").hasRole("PATIENT")
+                        .requestMatchers("/api/appointments/doctor/**").hasRole("DOCTOR")
+                        .requestMatchers("/api/appointments/status/**").hasAnyRole("DOCTOR", "ADMIN", "PATIENT")
+                        .requestMatchers("/api/appointments/all").hasRole("ADMIN")
+                        .requestMatchers("/api/appointments/delete/**").hasRole("ADMIN")
 
-                        // Appointment Features - Fixed 403 Forbidden
-                        .requestMatchers("/api/appointments/book").hasAnyAuthority("PATIENT", "ROLE_PATIENT")
-                        .requestMatchers("/api/appointments/patient/**").hasAnyAuthority("PATIENT", "ROLE_PATIENT")
-                        .requestMatchers("/api/appointments/doctor/**").hasAnyAuthority("DOCTOR", "ROLE_DOCTOR")
-                        .requestMatchers("/api/appointments/status/**").hasAnyAuthority("DOCTOR", "ADMIN", "PATIENT", "ROLE_DOCTOR", "ROLE_ADMIN", "ROLE_PATIENT")
-                        .requestMatchers("/api/appointments/all").hasAnyAuthority("ADMIN", "ROLE_ADMIN")
-                        .requestMatchers("/api/appointments/delete/**").hasAnyAuthority("ADMIN", "ROLE_ADMIN")
+                        // Availability Features
+                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/availability/**").hasRole("DOCTOR")
+                        .requestMatchers(org.springframework.http.HttpMethod.DELETE, "/api/availability/**").hasRole("DOCTOR")
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/availability/**").authenticated()
 
                         // Review Features
-                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/reviews/**").hasAnyAuthority("PATIENT", "ROLE_PATIENT")
+                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/reviews/**").hasRole("PATIENT")
 
                         // Admin & Shared Features
-                        .requestMatchers("/api/analytics/**").hasAnyAuthority("ADMIN", "ROLE_ADMIN")
-                        .requestMatchers("/api/auth/register-doctor").hasAnyAuthority("ADMIN", "ROLE_ADMIN")
-                        .requestMatchers("/api/users/**").hasAnyAuthority("ADMIN", "ROLE_ADMIN")
+                        .requestMatchers("/api/analytics/**").hasRole("ADMIN")
+                        .requestMatchers("/api/auth/register-doctor").hasRole("ADMIN")
+                        .requestMatchers("/api/users/**").hasRole("ADMIN")
 
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtFilter,
