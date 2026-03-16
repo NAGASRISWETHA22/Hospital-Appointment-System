@@ -11,13 +11,14 @@ import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import org.springframework.beans.factory.annotation.Value;
 import java.util.function.Function;
 
 @Service
 public class JwtService {
 
-    // Indha secret key 256-bit irukanum. Edhavadhu oru long string kudunga.
-    private static final String SECRET = "404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970";
+    @Value("${app.jwt.secret}")
+    private String secret;
 
     // 1. Generate Token
     public String generateToken(String userName) {
@@ -35,7 +36,7 @@ public class JwtService {
     }
 
     private Key getSignKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(SECRET);
+        byte[] keyBytes = Decoders.BASE64.decode(secret);
         return Keys.hmacShaKeyFor(keyBytes);
     }
 

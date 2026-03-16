@@ -2,22 +2,24 @@
 .dashboard-layout {
     display: flex;
     min-height: 100vh;
-    background-color: #f1f5f9; /* Soft grey background */
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: radial-gradient(circle at top right, #f8fafc, #eff6ff);
+    font-family: 'Outfit', 'Inter', sans-serif;
+    color: #1e293b;
 }
 
 /* --- SIDEBAR STYLING --- */
 .sidebar {
-    width: 260px;
-    background-color: #1e40af; /* Deep Blue */
+    width: 280px;
+    background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 100%);
     color: white;
     display: flex;
     flex-direction: column;
-    padding: 24px;
+    padding: 32px 24px;
     position: sticky;
     top: 0;
     height: 100vh;
-    box-shadow: 4px 0 10px rgba(0, 0, 0, 0.05);
+    box-shadow: 10px 0 30px rgba(30, 64, 175, 0.1);
+    z-index: 100;
 }
 
 .sidebar-brand h2 {
@@ -56,9 +58,11 @@
 }
 
 .sidebar-nav button.active {
-    background-color: #3b82f6; /* Bright Blue for Active */
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
     color: white;
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    border-left: 4px solid #60a5fa;
 }
 
 .logout-btn {
@@ -139,10 +143,27 @@
     transition: background 0.2s ease;
 }
 
-.doctor-table tr:hover {
-    background-color: #f8fafc;
-    transform: translateY(-1px);
-    box-shadow: inset 2px 0 0 0 #3b82f6;
+.doctor-card, .availability-card {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    animation: fadeInScale 0.5s ease forwards;
+}
+
+@keyframes fadeInScale {
+    from { opacity: 0; transform: scale(0.95) translateY(10px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.doctor-card:hover, .availability-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.1);
+    background: rgba(255, 255, 255, 1);
+    border-color: #3b82f6;
 }
 
 /* --- STATUS PILLS --- */
@@ -575,9 +596,9 @@
 
 .modern-slot-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-    gap: 12px;
-    margin-top: 12px;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 16px;
+    margin-top: 16px;
 }
 
 .slot-pill {

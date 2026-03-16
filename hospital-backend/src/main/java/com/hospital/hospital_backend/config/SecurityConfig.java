@@ -41,6 +41,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        .requestMatchers("/api/auth/register-doctor").hasRole("ADMIN")
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/departments/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/reviews/**").permitAll()
@@ -63,7 +64,6 @@ public class SecurityConfig {
 
                         // Admin & Shared Features
                         .requestMatchers("/api/analytics/**").hasAnyAuthority("ADMIN", "ROLE_ADMIN")
-                        .requestMatchers("/api/auth/register-doctor").hasAnyAuthority("ADMIN", "ROLE_ADMIN")
                         .requestMatchers("/api/users/**").hasAnyAuthority("ADMIN", "ROLE_ADMIN")
 
                         .anyRequest().authenticated())

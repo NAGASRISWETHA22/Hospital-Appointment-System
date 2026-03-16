@@ -98,7 +98,7 @@ const AppointmentHistory = ({ patientId }) => {
                                 <span className={`status-pill ${app.status.toLowerCase()}`}>{app.status}</span>
                             </div>
                             <div className="card-body">
-                                <h4 className="doc-name" style={{margin: '0 0 10px 0'}}>Dr. {app.doctor.name}</h4>
+                                <h4 className="doc-name" style={{margin: '0 0 10px 0'}}>Dr. {app.doctorName}</h4>
                                 <div className="time-range">
                                     <span className="time-block">Start: <b>{app.startTime}</b></span>
                                     <span className="time-block">End: <b>{app.endTime}</b></span>
@@ -137,7 +137,7 @@ const AppointmentHistory = ({ patientId }) => {
                 <div className="modal-overlay" onClick={() => setReviewing(null)}>
                     <div className="booking-modal premium-modal" onClick={e => e.stopPropagation()}>
                         <div className="pm-header">
-                            <h4>Rate Dr. {reviewing.doctor.name}</h4>
+                            <h4>Rate Dr. {reviewing.doctorName}</h4>
                             <p className="pm-subtitle">Your feedback helps improve our services</p>
                         </div>
                         <form onSubmit={handleReviewSubmit} className="booking-form">

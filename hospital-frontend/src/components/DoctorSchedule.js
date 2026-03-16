@@ -50,8 +50,8 @@ const DoctorSchedule = ({ doctorId, viewOnly = false }) => {
                                 <span className={`status-pill ${app.status.toLowerCase()}`}>{app.status}</span>
                             </div>
                             <div className="card-body">
-                                <h4 className="doc-name" style={{margin: '0 0 5px 0'}}>{app.patient.name}</h4>
-                                <p style={{ margin: '0 0 15px 0', color: '#64748b', fontSize: '13px' }}>{app.patient.email}</p>
+                                <h4 className="doc-name" style={{margin: '0 0 5px 0'}}>{app.patientName}</h4>
+                                <p style={{ margin: '0 0 15px 0', color: '#64748b', fontSize: '13px' }}>{app.patientEmail}</p>
                                 
                                 <div className="time-range">
                                     <span className="time-block">Start: <b>{app.startTime}</b></span>

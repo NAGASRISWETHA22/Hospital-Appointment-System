@@ -3,7 +3,6 @@ package com.hospital.hospital_backend.service.impl;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,6 +34,7 @@ public class AppointmentServiceImpl implements AppointmentService {
                 .id(appointment.getId())
                 .patientId(appointment.getPatient().getId())
                 .patientName(appointment.getPatient().getName())
+                .patientEmail(appointment.getPatient().getEmail())
                 .doctorId(appointment.getDoctor().getId())
                 .doctorName(appointment.getDoctor().getName())
                 .appointmentDate(appointment.getAppointmentDate())
@@ -110,7 +110,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         Appointment app = appointmentRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Appointment not found"));
 
-        // If cancelling OR rejecting, free up the doctor's slot
+        // If cancelling or rejecting, free up the doctor's slot
         if (status == AppointmentStatus.CANCELLED || status == AppointmentStatus.REJECTED) {
             Optional<DoctorAvailability> slotOpt = availabilityRepository
                     .findByDoctorAndAvailableDateAndStartTime(app.getDoctor(), app.getAppointmentDate(), app.getStartTime());

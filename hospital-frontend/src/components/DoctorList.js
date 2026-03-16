@@ -244,7 +244,7 @@ const DoctorList = () => {
                                     doctorReviews.map(review => (
                                         <div key={review.id} className="review-item">
                                             <div className="review-header">
-                                                <span className="reviewer-name">{review.patient?.name}</span>
+                                                <span className="reviewer-name">{review.patientName}</span>
                                                 <span className="stars">{"★".repeat(review.rating)}{"☆".repeat(5-review.rating)}</span>
                                             </div>
                                             <p className="review-text">{review.comment}</p>
