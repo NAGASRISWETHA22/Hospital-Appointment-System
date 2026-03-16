@@ -30,4 +30,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
             @org.springframework.data.repository.query.Param("deptId") Long deptId,
             @org.springframework.data.repository.query.Param("spec") String spec,
             @org.springframework.data.repository.query.Param("name") String name);
+
+    long countByRole(Role role);
 }

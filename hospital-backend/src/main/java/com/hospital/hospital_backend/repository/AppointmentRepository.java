@@ -1,6 +1,7 @@
 package com.hospital.hospital_backend.repository;
 
 import com.hospital.hospital_backend.entity.Appointment;
+import com.hospital.hospital_backend.enums.AppointmentStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -37,4 +38,7 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
         // 5. Reports: Total appointments per doctor (Admin Dashboard-kaga)
         @Query("SELECT a.doctor.name, COUNT(a) FROM Appointment a GROUP BY a.doctor.id")
         List<Object[]> countAppointmentsPerDoctor();
+
+        long countByStatus(AppointmentStatus status);
+        long countByDoctor_Id(Long doctorId);
 }

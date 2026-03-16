@@ -170,7 +170,9 @@ const AdminPanel = ({ mode }) => {
                         <div className="report-card-premium">
                             <div className="rc-header">
                                 <h4>Revenue per Department</h4>
-                                <button className="refresh-btn-small" onClick={fetchData}>Export CSV</button>
+                                <button className="refresh-btn-small" onClick={() => {
+                                    window.open(`${process.env.REACT_APP_API_URL || 'https://hospital-appointment-system-1o4k.onrender.com/api'}/analytics/export-csv`, '_blank');
+                                }}>Export CSV</button>
                             </div>
                             <div className="rc-list">
                                 {stats?.revenuePerDepartment?.map((row, idx) => (
