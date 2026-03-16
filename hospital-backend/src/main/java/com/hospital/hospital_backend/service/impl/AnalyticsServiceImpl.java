@@ -1,16 +1,19 @@
 package com.hospital.hospital_backend.service.impl;
 
+import com.hospital.hospital_backend.dto.response.DashboardStatsResponse;
+import com.hospital.hospital_backend.dto.response.DepartmentRevenue;
+import com.hospital.hospital_backend.dto.response.DoctorAppointmentCount;
 import com.hospital.hospital_backend.entity.Appointment;
+import com.hospital.hospital_backend.enums.AppointmentStatus;
+import com.hospital.hospital_backend.enums.Role;
 import com.hospital.hospital_backend.repository.AppointmentRepository;
-import com.hospital.hospital_backend.repository.DepartmentRepository;
 import com.hospital.hospital_backend.repository.UserRepository;
+import com.hospital.hospital_backend.repository.DepartmentRepository;
 import com.hospital.hospital_backend.service.AnalyticsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -21,47 +24,57 @@ public class AnalyticsServiceImpl implements AnalyticsService {
     private final UserRepository userRepository;
     private final DepartmentRepository departmentRepository;
 
+    private static final double CONSULTATION_FEE = 500.0;
+
     @Override
-    public Map<String, Object> getAdminDashboardStats() {
-        Map<String, Object> stats = new HashMap<>();
+    public DashboardStatsResponse getDashboardStats() {
         long totalAppointments = appointmentRepository.count();
-        long totalDoctors = userRepository.findByRole(com.hospital.hospital_backend.enums.Role.DOCTOR).size();
-        long totalPatients = userRepository.findByRole(com.hospital.hospital_backend.enums.Role.PATIENT).size();
-        stats.put("totalAppointments", totalAppointments);
-        stats.put("totalDoctors", totalDoctors);
-        stats.put("totalPatients", totalPatients);
-        // Assuming Rs. 500 per appointment
-        stats.put("totalRevenue", totalAppointments * 500);
-        return stats;
+        long totalDoctors = userRepository.countByRole(Role.DOCTOR);
+        long totalPatients = userRepository.countByRole(Role.PATIENT);
+        
+        long completedAppointments = appointmentRepository.countByStatus(AppointmentStatus.COMPLETED);
+        double totalRevenue = completedAppointments * CONSULTATION_FEE;
+
+        List<DepartmentRevenue> revenuePerDepartment = departmentRepository.findAll().stream()
+            .map(dept -> {
+                long completedInDept = appointmentRepository.findAll().stream()
+                    .filter(a -> a.getStatus() == AppointmentStatus.COMPLETED && 
+                                a.getDoctor().getDepartment() != null && 
+                                a.getDoctor().getDepartment().getId().equals(dept.getId()))
+                    .count();
+                return new DepartmentRevenue(dept.getName(), completedInDept * CONSULTATION_FEE);
+            })
+            .collect(Collectors.toList());
+
+        List<DoctorAppointmentCount> appointmentsPerDoctor = userRepository.findByRole(Role.DOCTOR).stream()
+            .map(doctor -> {
+                long count = appointmentRepository.countByDoctor_Id(doctor.getId());
+                return new DoctorAppointmentCount(doctor.getName(), count);
+            })
+            .collect(Collectors.toList());
+
+        return DashboardStatsResponse.builder()
+                .totalAppointments(totalAppointments)
+                .totalRevenue(totalRevenue)
+                .totalDoctors(totalDoctors)
+                .totalPatients(totalPatients)
+                .revenuePerDepartment(revenuePerDepartment)
+                .appointmentsPerDoctor(appointmentsPerDoctor)
+                .build();
     }
 
     @Override
-    public List<Map<String, Object>> getAppointmentsPerDoctor() {
-        List<Object[]> results = appointmentRepository.countAppointmentsPerDoctor();
-        return results.stream().map(row -> {
-            Map<String, Object> map = new HashMap<>();
-            map.put("doctorName", row[0]);
-            map.put("appointmentCount", row[1]);
-            return map;
-        }).collect(Collectors.toList());
-    }
-
-    @Override
-    public List<Map<String, Object>> getRevenuePerDepartment() {
-        // Find all appointments, group by doctor -> department
-        List<Appointment> allAppointments = appointmentRepository.findAll();
-        Map<String, Long> countPerDept = allAppointments.stream()
-                .filter(a -> a.getDoctor().getDepartment() != null)
-                .collect(Collectors.groupingBy(
-                        a -> a.getDoctor().getDepartment().getName(),
-                        Collectors.counting()
-                ));
-
-        return countPerDept.entrySet().stream().map(entry -> {
-            Map<String, Object> map = new HashMap<>();
-            map.put("departmentName", entry.getKey());
-            map.put("revenue", entry.getValue() * 500); // 500 per appointment
-            return map;
-        }).collect(Collectors.toList());
+    public String exportAppointmentsToCSV() {
+        List<Appointment> appointments = appointmentRepository.findAll();
+        StringBuilder csv = new StringBuilder("ID,Patient,Doctor,Date,Time,Status\n");
+        for (Appointment a : appointments) {
+            csv.append(a.getId()).append(",")
+               .append(a.getPatient().getName()).append(",")
+               .append(a.getDoctor().getName()).append(",")
+               .append(a.getAppointmentDate()).append(",")
+               .append(a.getStartTime()).append(",")
+               .append(a.getStatus()).append("\n");
+        }
+        return csv.toString();
     }
 }
